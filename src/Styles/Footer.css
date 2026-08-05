@@ -1,0 +1,141 @@
+.vaagai-footer {
+  background-color: #0f172a; /* டார்க் ப்ளூ / க்ரே கலர் */
+  color: #f1f5f9;
+  padding: 40px 20px 20px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 50px;
+  border-top: 4px solid #1e3a8a; /* ராயல் ப்ளூ பார்டர் */
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 220px;
+}
+
+.footer-logo-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.footer-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+}
+
+.footer-logo-title h2 {
+  font-size: 1.6rem;
+  color: #ffffff;
+  margin: 0;
+}
+
+.footer-desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+
+.footer-section h3 {
+  color: #38bdf8; /* ஸ்கை ப்ளூ நிற ஹெட்டிங் */
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.footer-section h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 40px;
+  height: 2px;
+  background-color: #38bdf8;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 12px;
+}
+
+.footer-section ul li a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.footer-section ul li a:hover {
+  color: #38bdf8;
+  padding-left: 4px;
+}
+
+.footer-section p {
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  color: #cbd5e1;
+}
+
+/* சோசியல் மீடியா பட்டன்களுக்கான பிரத்யேக கலர்கள் */
+.social-icons {
+  display: flex;
+  flex-direction: column; /* பட்டன்கள் ஒன்றன் கீழ் ஒன்றாக நேர்த்தியாக வர */
+  gap: 10px;
+  margin-top: 15px;
+  max-width: 160px;
+}
+
+.social-icon {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.social-icon.instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.social-icon.facebook {
+  background-color: #1877f2;
+}
+
+.social-icon.whatsapp {
+  background-color: #25d366;
+}
+
+.social-icon:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #334155;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}

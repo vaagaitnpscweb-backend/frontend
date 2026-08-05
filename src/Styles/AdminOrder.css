@@ -1,0 +1,100 @@
+.admin-orders-container {
+  max-width: 1300px;
+  margin: 30px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.admin-header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.admin-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+}
+
+.admin-header p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.admin-loading, .no-orders-box {
+  text-align: center;
+  padding: 50px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  font-size: 1.2rem;
+}
+
+/* டேபிள் டிசைன் */
+.table-responsive {
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid #e2e8f0;
+}
+
+.admin-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-orders-table th {
+  background-color: #f1f5f9;
+  color: #334155;
+  padding: 16px;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-orders-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.admin-orders-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.order-no-cell code {
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #0f172a;
+  font-weight: bold;
+}
+
+.price-cell {
+  font-weight: bold;
+  color: #0d9488;
+}
+
+.address-cell {
+  max-width: 250px;
+  line-height: 1.5;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-badge.paid {
+  background-color: #ccfbf1;
+  color: #0d9488;
+}

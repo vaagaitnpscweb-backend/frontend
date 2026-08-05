@@ -1,0 +1,17 @@
+/* வெப்சைட் முழுவதும் பேக்ரவுண்ட் நடுவில் லோகோ ஃபிக்ஸ்டா இருக்க */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;                      
+  height: 400px;                     
+  background-image: url('./assets/logoImg.jpeg'); /* index.css-ல் இருந்து assets-க்கான சரியான பாத் */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.06; /* மங்கலான வாட்டர்மார்க் லுக் */
+  z-index: -1;   
+  pointer-events: none; 
+}

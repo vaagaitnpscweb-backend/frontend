@@ -1,0 +1,151 @@
+
+
+
+.admin-login-wrapper {
+  min-height: 100vh;
+  background-color: #e6f4f1; /* பின்னணி லைட் கிரீன் கலர் */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+/* பச்சை நிற ஹெடர் செக்ஷன் */
+.admin-card-header {
+  background: linear-gradient(135deg, #2a9d8f, #264653);
+  color: #ffffff;
+  padding: 30px 25px 50px 25px;
+  position: relative;
+}
+
+.admin-card-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.admin-card-header p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* மையத்தில் வரும் லோகோ பாஃக்ஸ் */
+.admin-logo-badge {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 70px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.admin-logo-badge img {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ஃபார்ம் பாடி செக்ஷன் */
+.admin-card-body {
+  padding: 55px 30px 35px 30px;
+}
+
+.admin-form-group {
+  margin-bottom: 20px;
+}
+
+.admin-form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.admin-form-input {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #eef2f6; /* படத்தில் இருப்பது போன்ற லைட் ப்ளூ/க்ரே இன்ஜக்ஷன் */
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #1e293b;
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.admin-form-input:focus {
+  background-color: #ffffff;
+  border-color: #2a9d8f;
+  box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15);
+}
+
+.admin-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.admin-checkbox-group input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2a9d8f;
+  cursor: pointer;
+}
+
+.admin-checkbox-group label {
+  font-size: 14px;
+  color: #475569;
+  cursor: pointer;
+}
+
+/* பச்சை நிற பட்டன் */
+.admin-btn-login {
+  width: 100%;
+  background-color: #2a9d8f;
+  color: #ffffff;
+  border: none;
+  padding: 13px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-btn-login:hover {
+  background-color: #218378;
+}
+
+.admin-error-box {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}

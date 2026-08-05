@@ -1,0 +1,112 @@
+/* எக்ஸாம் பக்க மெயின் கன்டைனர் */
+.exam-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 75vh;
+}
+
+/* எக்ஸாம் பக்க ஹெடர் */
+.exam-page-header {
+  text-align: center;
+  padding: 40px 20px;
+  border-radius: 12px;
+  color: white;
+  margin-bottom: 40px;
+  /* ரயில்வே பக்கத்திற்கு ஒரு மாஸான டார்க் ப்ளூ கிரேடியன்ட் */
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.exam-page-header h2 {
+  font-size: 2.2rem;
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.exam-page-header p {
+  font-size: 1.1rem;
+  color: #e0f2fe;
+  margin: 0;
+}
+
+/* மெட்டீரியல் கார்டுகள் லேஅவுட் */
+.materials-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.material-exam-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.material-exam-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.mat-badge {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.material-exam-card h3 {
+  font-size: 1.25rem;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.material-exam-card p {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 25px 0;
+}
+
+/* பட்டன் ஸ்டைல் */
+.mat-action-btn {
+  width: 100%;
+  color: white;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.mat-action-btn:hover {
+  opacity: 0.9;
+}
+
+/* மொபைல் வியூ ரெஸ்பான்சிவ் 📱 */
+@media screen and (max-width: 768px) {
+  .exam-page-header h2 {
+    font-size: 1.6rem;
+  }
+  .exam-page-header p {
+    font-size: 0.95rem;
+  }
+  .material-exam-card {
+    padding: 20px;
+  }
+}

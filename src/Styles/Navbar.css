@@ -1,0 +1,242 @@
+/* --- டெஸ்க்டாப் மற்றும் பொதுவான ஸ்டைல்ஸ் --- */
+.google-navbar {
+  background-color: #1e3a8a; /* ராயல் ப்ளூ */
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.round-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.nav-search-container {
+  flex: 1;
+  max-width: 600px;
+}
+
+.google-search-box {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 6px 12px;
+  position: relative;
+}
+
+.search-icon {
+  color: #64748b;
+  margin-right: 8px;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.clear-icon {
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0 4px;
+}
+
+.nav-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-cart {
+  font-size: 22px;
+  position: relative;
+  cursor: pointer;
+  color: white;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.nav-login-btn {
+  background-color: white;
+  color: #1e3a8a;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-login-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.nav-bottom-tabs {
+  margin-top: 10px;
+}
+
+.tabs-list {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 15px;
+  overflow-x: auto;
+  /* [🌟 வெள்ளை கோட்டை மறைக்க இந்த 3 வரிகள் முக்கியம்] */
+  scrollbar-width: none; /* Firefox-க்காக */
+  -ms-overflow-style: none; /* IE-க்காக */
+}
+
+/* Chrome, Safari-ல் வெள்ளை ஸ்க்ரோல் பார் வராமல் தடுக்க */
+.tabs-list::-webkit-scrollbar {
+  display: none; 
+}
+
+.tab-item a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  display: block;
+  white-space: nowrap;
+}
+
+.tab-item.active a, .tab-item a:hover {
+  color: white;
+  font-weight: bold;
+}
+
+/* மொபைலில் மட்டும் ஆரம்பத்தில் மறைய வேண்டியவை */
+.mobile-menu-toggle-btn, .mobile-menu-header {
+  display: none;
+}
+
+/* --- மொபைல் வியூ மீடியா குவாரி 📱 --- */
+@media screen and (max-width: 768px) {
+  .mobile-menu-toggle-btn {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+  }
+
+  .desktop-only-logo, .desktop-only-actions {
+    display: none;
+  }
+
+  .nav-top-row {
+    gap: 10px;
+  }
+
+  .nav-search-container {
+    max-width: 100%;
+  }
+
+  .nav-bottom-tabs {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: #0f172a; 
+    box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    margin-top: 0;
+  }
+
+  .nav-bottom-tabs.mobile-open {
+    display: block;
+    animation: slideDownMenu 0.25s ease-out;
+  }
+
+  .mobile-menu-header {
+    display: flex;
+    align-items: center;
+    background-color: #1e3a8a;
+    padding: 20px;
+    gap: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .mobile-menu-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  .mobile-menu-user-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-menu-login-btn {
+    background-color: #ffffff;
+    color: #1e3a8a;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .tabs-list {
+    flex-direction: column;
+    gap: 0;
+    overflow-x: visible;
+    padding: 10px 0;
+  }
+
+  .tab-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .tab-item a {
+    padding: 14px 20px;
+    color: #e2e8f0;
+    font-size: 15px;
+  }
+
+  .tab-item.active {
+    background-color: rgba(30, 58, 138, 0.4);
+  }
+  
+  .tab-item.active a {
+    color: #38bdf8;
+  }
+}
+
+@keyframes slideDownMenu {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
