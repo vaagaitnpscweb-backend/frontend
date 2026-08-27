@@ -21,10 +21,10 @@ import Footer from './Componentss/Footer.jsx';
 import LegalPage from './Componentss/LegalPage.jsx';
 import Tenth from './Componentss/Tenth.jsx';
 import Twelfth from './Componentss/Twelfth.jsx';
+
 // 👑 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள்
 import AdminLogin from './AdminPages/AdminLogin.jsx';
 import MasterAdmin from './AdminPages/MasterAdmin.jsx';
-
 
 // 🚀 Render Live Backend Base URL
 export const API_BASE_URL = 'https://vaagai-tuition-backend.onrender.com';
@@ -33,8 +33,13 @@ export const API_BASE_URL = 'https://vaagai-tuition-backend.onrender.com';
 function AppContent({ user, setUser, showLogin, setShowLogin }) {
   const location = useLocation();
 
-  // /masteradmin, /superadmin மற்றும் /adminlogin பக்கங்களில் Navbar மற்றும் Footer தேவையில்லை
-  const hideNavbarAndFooter = location.pathname === '/masteradmin' || location.pathname === '/superadmin' || location.pathname === '/adminlogin';
+  // /masteradmin, /adminlogin, /superadmin, /admin போன்ற அனைத்து அட்மின் வழிகளிலும் Navbar & Footer முழுமையாக மறைக்கப்படும்
+  const currentPath = location.pathname.toLowerCase();
+  const hideNavbarAndFooter = 
+    currentPath.startsWith('/masteradmin') || 
+    currentPath.startsWith('/adminlogin') || 
+    currentPath.startsWith('/superadmin') ||
+    currentPath.startsWith('/admin');
 
   return (
     <div>
@@ -47,7 +52,7 @@ function AppContent({ user, setUser, showLogin, setShowLogin }) {
         setUser={setUser} 
       />
 
-      {/* வாட்டர்மார்க் லோகோ பின்னணி */}
+      {/* வாட்டர்மார்க் லோகோ பின்னணி - அட்மின் பக்கங்களில் வராது */}
       {!hideNavbarAndFooter && (
         <div 
           style={{
@@ -83,11 +88,11 @@ function AppContent({ user, setUser, showLogin, setShowLogin }) {
         <Route path="/legalpage" element={<LegalPage />} />
         <Route path="/tenth" element={<Tenth />} />
         <Route path="/twelfth" element={<Twelfth />} />
+
         {/* 🔐 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள் */}
         <Route path='/adminlogin' element={<AdminLogin />} />
         <Route path='/masteradmin' element={<MasterAdmin />} />
         
-
         {/* தவறான URL அடித்தால் ஹோம் பக்கத்திற்குத் திருப்ப */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
