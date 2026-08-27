@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/Home.css';
 import logoImg from '../assets/logoImg.jpeg';
@@ -32,60 +32,32 @@ function Home() {
     }
   ]);
 
-  // Notifications & Materials States (English Default)
+  // Notifications & Materials States
   const [notifications, setNotifications] = useState([
-    { id: 1, text: "🔥 TNPSC Group 4 Results & Counseling Dates Announced!", link: "/tnpsc" },
-    { id: 2, text: "🆕 RRB NTPC New Vacancy Notification Released!", link: "/rrb" },
-    { id: 3, text: "📢 TN Police SI Exam Online Application Started!", link: "/si" }
+    { id: 1, text: "🔥 TNPSC Group 4 & Model Tests Announced!", link: "/free-quiz" },
+    { id: 2, text: "🆕 Mixed Subject Online Mock Tests Live!", link: "/free-quiz" },
+    { id: 3, text: "📢 Daily Current Affairs & Tamil Practice Started!", link: "/free-quiz" }
   ]);
 
   const [studyMaterials, setStudyMaterials] = useState([
-    { id: 1, text: "📕 10th Standard Tamil Grammar Notes [Vaagai Special]", link: "/tnpsc" },
-    { id: 2, text: "📘 General Knowledge - Important Articles of Indian Constitution", link: "/free-quiz" },
-    { id: 3, text: "📙 Aptitude & Mental Ability - Simple & Compound Interest Tricks", link: "/rrb" }
+    { id: 1, text: "📕 Tamil Grammar Notes & Model Question Sets [Vaagai Special]", link: "/premium" },
+    { id: 2, text: "📘 General Knowledge - Important Articles & Science", link: "/free-quiz" },
+    { id: 3, text: "📙 Aptitude & Mental Ability - Shortcut Methods", link: "/free-quiz" }
   ]);
 
-  // 🌐 Fetch Live Slides, Notifications, & Materials from Backend
+  // 🌐 Fetch Live Slides from Backend (Safe Filter Applied)
   useEffect(() => {
-    // 1. Fetch Slides from Backend
     fetch(`${API_BASE}/api/home/slides`)
       .then(res => res.json())
       .then(data => {
         if (data && data.success && data.slides.length > 0) {
-          setSlides(data.slides);
+          const validSlides = data.slides.filter(s => s.image && s.image.trim() !== '');
+          if (validSlides.length > 0) {
+            setSlides(validSlides);
+          }
         }
       })
       .catch(err => console.log("Using default fallback slides."));
-
-    // 2. Fetch Notifications
-    fetch(`${API_BASE}/api/home/notifications`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && data.notifications.length > 0) {
-          const mappedNotes = data.notifications.map(n => ({
-            id: n.id,
-            text: n.text,
-            link: n.text.includes("RRB") ? "/rrb" : n.text.includes("SI") ? "/si" : "/tnpsc"
-          }));
-          setNotifications(mappedNotes);
-        }
-      })
-      .catch(err => console.log("Using default notifications."));
-
-    // 3. Fetch PDFs
-    fetch(`${API_BASE}/api/home/pdfs`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && data.pdfs.length > 0) {
-          const mappedPdfs = data.pdfs.map(p => ({
-            id: p.id,
-            text: `📄 ${p.title} [${p.size || 'PDF'}]`,
-            link: "/premium"
-          }));
-          setStudyMaterials(mappedPdfs);
-        }
-      })
-      .catch(err => console.log("Using default study materials."));
   }, []);
 
   // Auto Slide Timer (4 Seconds)
@@ -98,10 +70,10 @@ function Home() {
   }, [slides.length]);
 
   const examCategories = [
-    { id: 'tnpsc', title: '📖 TNPSC Exams', desc: 'Dedicated question packs & study notes for Group 2, Group 4 & VAO.', link: '/tnpsc', color: '#1e3a8a' },
-    { id: 'rrb', title: '🚂 RRB Railways', desc: 'Maths, Reasoning & GK practice sets for NTPC, Group D & ALP exams.', link: '/rrb', color: '#0284c7' },
-    { id: 'si', title: '👮 SI Exams', desc: 'Special psychology & general science sections for Sub-Inspector exams.', link: '/si', color: '#059669' },
-    { id: 'pc', title: '🎖️ PC Exams', desc: 'Mock tests and simplified revision guides for Police Constable exams.', link: '/pc', color: '#dc2626' }
+    { id: 'tamil', title: '📖 பொதுத் தமிழ் (Tamil)', desc: 'இலக்கியம், இலக்கணம் மற்றும் உரைநடை சார்ந்த முக்கிய வினா வங்கி.', link: '/free-quiz', color: '#1e3a8a' },
+    { id: 'maths', title: '🧮 கணிதம் (Maths & Aptitude)', desc: 'வேகமாக கணக்கிடும் குறுக்கு வழிகளுடன் கூடிய பயிற்சித் தேர்வுகள்.', link: '/free-quiz', color: '#0284c7' },
+    { id: 'science', title: '🔬 அறிவியல் (Science)', desc: 'இயற்பியல், வேதியியல் மற்றும் உயிரியல் முக்கிய மாதிரி வினாக்கள்.', link: '/free-quiz', color: '#059669' },
+    { id: 'social', title: '🏛️ சமூக அறிவியல் (Social)', desc: 'வரலாறு, புவியியல் மற்றும் இந்திய அரசியலமைப்பு வினாத்தாள்கள்.', link: '/free-quiz', color: '#dc2626' }
   ];
 
   return (
@@ -190,7 +162,7 @@ function Home() {
 
       {/* 4. EXAM CATEGORIES CARDS */}
       <section className="categories-section">
-        <h2 className="section-title">🎯 Exam Categories</h2>
+        <h2 className="section-title">🎯 Topic-wise Practice Categories</h2>
         <div className="categories-grid">
           {examCategories.map((exam) => (
             <div 
