@@ -1,4 +1,4 @@
-import { useState } from 'react'; 
+import { useState, useEffect, useRef } from 'react'; 
 import { Link, useNavigate } from 'react-router-dom'; 
 import '../Styles/Navbar.css'; 
 import logoImg from '../assets/logoImg.jpeg';
@@ -8,21 +8,26 @@ function Navbar({ setShowLogin, user, setUser }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
 
+  // Dropdown States
+  const [schoolOpen, setSchoolOpen] = useState(false);
+  const [examOpen, setExamOpen] = useState(false);
+
+  const navRef = useRef(null);
+
+  // வெளியேய கிளிக் செய்தால் டிராப்-டவுன் மூடப்படும்
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setSchoolOpen(false);
+        setExamOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const navigate = useNavigate(); 
 
-  const tabs = [
-    { id: 'home', name: '🏠 Home', link: '/' },
-    { id: 'current-affairs', name: '📰 Daily Current Affairs', link: '/current-affairs' },
-    { id: 'free-quiz', name: '📚 Free Quiz', link: '/free-quiz', className: 'free-quiz-tab' },
-    { id: 'premium', name: '💎 Premium Question Packs', link: '/premium', className: 'premium-tab' },
-    { id: 'rrb', name: '📖 RRB Questions', link: '/rrb' },
-    { id: 'tnpsc', name: '📖 TNPSC Questions', link: '/tnpsc' },
-    { id: 'si', name: '📖 SI Questions', link: '/si' },
-    { id: 'pc', name: '📖 PC Questions', link: '/pc' },
-    { id: 'purchases', name: '👤 My Purchases', link: '/purchases', className: 'my-purchases-tab' }
-  ];
-
-  // 🔍 எக்ஸ்ட்ரா லாஜிக்: மாணவர்கள் Enter தட்டும்போது சர்ச் பக்கத்திற்கு அழைத்துச் செல்லும் ஃபங்ஷன்
   const handleSearchSubmit = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -34,29 +39,6 @@ function Navbar({ setShowLogin, user, setUser }) {
     }
   };
 
-  // ✕ பட்டனை அழுத்தும்போது சர்ச் வேல்யூவை கிளியர் செய்துவிட்டு ஹோம் பேஜுக்கு கொண்டு வரும்
-  const handleClearSearch = () => {
-    setSearchQuery(''); // 👈 பிழை சரிசெய்யப்பட்டது (setQuery-க்கு பதில் setSearchQuery)
-    navigate('/');
-    setActiveTab('home');
-  };
-
-  const handleTabClick = (tab, e) => {
-    e.preventDefault(); 
-
-    // பயனர் லாகின் செய்யவில்லை என்றால் My Purchases பார்க்க முடியாது
-    if (tab.id === 'purchases' && !user) {
-      setShowLogin(true); 
-      setIsMobileMenuOpen(false);
-      return; 
-    }
-
-    setActiveTab(tab.id);
-    setIsMobileMenuOpen(false); 
-    navigate(tab.link); 
-  };
-
-  // 🚪 Logout செய்யும் பொதுவான ஃபங்ஷன்
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
@@ -65,7 +47,7 @@ function Navbar({ setShowLogin, user, setUser }) {
   };
 
   return (
-    <nav className="google-navbar">
+    <nav className="google-navbar" ref={navRef}>
       <div className="nav-top-row">
         
         {/* ☰ மொபைல் மெனு பட்டன் */}
@@ -76,14 +58,14 @@ function Navbar({ setShowLogin, user, setUser }) {
           {isMobileMenuOpen ? '✕' : '☰'}
         </button>
 
-        {/* டெஸ்க்டாப் லோகோ */}
+        {/* லோகோ */}
         <div className="nav-logo-section desktop-only-logo">
           <Link to="/" onClick={() => setActiveTab('home')}>
             <img src={logoImg} alt="Vaagai Logo" className="round-logo" />
           </Link>
         </div>
 
-        {/* 🔍 நடுப்பகுதி: சர்ச் பாக்ஸ் */}
+        {/* சர்ச் பாக்ஸ் */}
         <div className="nav-search-container">
           <div className="google-search-box">
             <span className="search-icon">🔍</span>
@@ -96,49 +78,20 @@ function Navbar({ setShowLogin, user, setUser }) {
               onKeyDown={handleSearchSubmit} 
             />
             {searchQuery && (
-              <span className="clear-icon" onClick={handleClearSearch}>✕</span>
+              <span className="clear-icon" onClick={() => setSearchQuery('')}>✕</span>
             )}
           </div>
         </div>
 
-        {/* 💻 டெஸ்க்டாப் ஆக்சன்கள் */}
+        {/* லாகின் / அவுட் பகுதி (கார்ட் நீக்கப்பட்டது) */}
         <div className="nav-profile-actions desktop-only-actions">
-          <div className="nav-cart">
-            🛒 <span className="cart-badge">0</span>
-          </div>
-          
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ 
-                fontWeight: '600', 
-                color: '#ffffff', 
-                backgroundColor: 'rgba(255, 255, 255, 0.15)', 
-                padding: '6px 12px', 
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}>
-                👤 {user.name || user.username || "மாணவர்"}
-              </span>
-              <button 
-                onClick={handleLogout}
-                style={{ 
-                  padding: '6px 12px', 
-                  backgroundColor: '#d32f2f', 
-                  color: '#fff', 
-                  border: 'none', 
-                  borderRadius: '4px', 
-                  cursor: 'pointer', 
-                  fontWeight: 'bold',
-                  fontSize: '13px'
-                }}
-              >
-                Logout
-              </button>
+            <div className="user-profile-box">
+              <span className="user-name-badge">👤 {user.name || user.username || "மாணவர்"}</span>
+              <button onClick={handleLogout} className="nav-logout-btn">Logout</button>
             </div>
           ) : (
-            <button className="nav-login-btn" onClick={() => setShowLogin(true)}>
-              Login
-            </button>
+            <button className="nav-login-btn" onClick={() => setShowLogin(true)}>Login</button>
           )}
         </div>
       </div>
@@ -146,21 +99,15 @@ function Navbar({ setShowLogin, user, setUser }) {
       {/* மெனு லிஸ்ட் */}
       <div className={`nav-bottom-tabs ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         
-        {/* 📱 மொபைல் மெனு ஹெடர் */}
         <div className="mobile-menu-header">
-          <img src={logoImg} alt="Vaagai Logo" className="mobile-menu-logo" />
+          <img src={logoImg} alt="Logo" className="mobile-menu-logo" />
           <div className="mobile-menu-user-section" style={{ width: '100%' }}>
             {user ? (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontWeight: 'bold', color: '#2e7d32', marginBottom: '5px' }}>
+                <div style={{ fontWeight: 'bold', color: '#38bdf8', marginBottom: '8px' }}>
                   👤 {user.name || user.username || "மாணவர்"}
                 </div>
-                <button 
-                  onClick={handleLogout}
-                  style={{ width: '100%', padding: '6px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
-                >
-                  🚪 Logout
-                </button>
+                <button onClick={handleLogout} className="mobile-logout-btn">🚪 Logout</button>
               </div>
             ) : (
               <button className="mobile-menu-login-btn" onClick={() => { setShowLogin(true); setIsMobileMenuOpen(false); }}>
@@ -171,16 +118,71 @@ function Navbar({ setShowLogin, user, setUser }) {
         </div>
 
         <ul className="tabs-list">
-          {tabs.map((tab) => (
-            <li 
-              key={tab.id} 
-              className={`tab-item ${tab.className || ''} ${activeTab === tab.id ? 'active' : ''}`}
+          <li className={`tab-item ${activeTab === 'home' ? 'active' : ''}`}>
+            <Link to="/" onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }}>🏠 Home</Link>
+          </li>
+          
+          <li className={`tab-item ${activeTab === 'current-affairs' ? 'active' : ''}`}>
+            <Link to="/current-affairs" onClick={() => { setActiveTab('current-affairs'); setIsMobileMenuOpen(false); }}>📰 Daily Current Affairs</Link>
+          </li>
+
+          <li className={`tab-item ${activeTab === 'free-quiz' ? 'active' : ''}`}>
+            <Link to="/free-quiz" onClick={() => { setActiveTab('free-quiz'); setIsMobileMenuOpen(false); }}>📚 Free Quiz</Link>
+          </li>
+
+          <li className={`tab-item ${activeTab === 'premium' ? 'active' : ''}`}>
+            <Link to="/premium" onClick={() => { setActiveTab('premium'); setIsMobileMenuOpen(false); }}>💎 Premium Question Packs</Link>
+          </li>
+
+          {/* School Materials Dropdown */}
+          <li className="tab-item dropdown-container">
+            <div 
+              className="dropdown-btn-title"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSchoolOpen(!schoolOpen);
+                setExamOpen(false);
+              }}
             >
-              <Link to={tab.link} onClick={(e) => handleTabClick(tab, e)}>
-                {tab.name}
-              </Link>
-            </li>
-          ))}
+              📚 School Materials <span className="arrow">{schoolOpen ? '▴' : '▾'}</span>
+            </div>
+            {schoolOpen && (
+              <div className="dropdown-menu-box">
+                <Link to="/tenth" onClick={() => { setSchoolOpen(false); setIsMobileMenuOpen(false); }}>📖 10th Standard PDF</Link>
+                <Link to="/twelfth" onClick={() => { setSchoolOpen(false); setIsMobileMenuOpen(false); }}>📖 12th Standard PDF</Link>
+              </div>
+            )}
+          </li>
+
+          {/* Competitive Exams Dropdown */}
+          <li className="tab-item dropdown-container">
+            <div 
+              className="dropdown-btn-title"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExamOpen(!examOpen);
+                setSchoolOpen(false);
+              }}
+            >
+              🎯 Competitive Exams <span className="arrow">{examOpen ? '▴' : '▾'}</span>
+            </div>
+            {examOpen && (
+              <div className="dropdown-menu-box">
+                <Link to="/tnpsc" onClick={() => { setExamOpen(false); setIsMobileMenuOpen(false); }}>📝 TNPSC Questions</Link>
+                <Link to="/rrb" onClick={() => { setExamOpen(false); setIsMobileMenuOpen(false); }}>📝 RRB Questions</Link>
+                <Link to="/si" onClick={() => { setExamOpen(false); setIsMobileMenuOpen(false); }}>📝 SI Questions</Link>
+                <Link to="/pc" onClick={() => { setExamOpen(false); setIsMobileMenuOpen(false); }}>📝 PC Questions</Link>
+              </div>
+            )}
+          </li>
+
+          <li className={`tab-item ${activeTab === 'purchases' ? 'active' : ''}`}>
+            <Link to="/purchases" onClick={(e) => {
+              if (!user) { e.preventDefault(); setShowLogin(true); setIsMobileMenuOpen(false); return; }
+              setActiveTab('purchases');
+              setIsMobileMenuOpen(false);
+            }}>👤 My Purchases</Link>
+          </li>
         </ul>
       </div>
     </nav>
