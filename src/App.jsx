@@ -19,10 +19,12 @@ import MyPurchases from './Componentss/MyPurchases.jsx';
 import Splash from './Componentss/Splash.jsx';
 import Footer from './Componentss/Footer.jsx';
 import LegalPage from './Componentss/LegalPage.jsx';
-
-// 👑 மாஸ்டர் அட்மின் பக்கங்கள் மட்டும் வைக்கப்பட்டுள்ளன
+import Tenth from './Componentss/Tenth.jsx';
+import Twelfth from './Componentss/Twelfth.jsx';
+// 👑 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள்
 import AdminLogin from './AdminPages/AdminLogin.jsx';
 import MasterAdmin from './AdminPages/MasterAdmin.jsx';
+
 
 // 🚀 Render Live Backend Base URL
 export const API_BASE_URL = 'https://vaagai-tuition-backend.onrender.com';
@@ -31,8 +33,8 @@ export const API_BASE_URL = 'https://vaagai-tuition-backend.onrender.com';
 function AppContent({ user, setUser, showLogin, setShowLogin }) {
   const location = useLocation();
 
-  // /masteradmin மற்றும் /adminlogin பக்கங்களில் Navbar மற்றும் Footer தேவையில்லை
-  const hideNavbarAndFooter = location.pathname === '/masteradmin' || location.pathname === '/adminlogin';
+  // /masteradmin, /superadmin மற்றும் /adminlogin பக்கங்களில் Navbar மற்றும் Footer தேவையில்லை
+  const hideNavbarAndFooter = location.pathname === '/masteradmin' || location.pathname === '/superadmin' || location.pathname === '/adminlogin';
 
   return (
     <div>
@@ -79,10 +81,12 @@ function AppContent({ user, setUser, showLogin, setShowLogin }) {
         <Route path="/pc" element={<Pc />} />
         <Route path="/purchases" element={<MyPurchases />} />
         <Route path="/legalpage" element={<LegalPage />} />
-        
-        {/* 🔐 மாஸ்டர் அட்மின் லாகின் & மெயின் டேஷ்போர்டு பக்கங்கள் மட்டுமே அனுமதிக்கப்பட்டுள்ளது */}
+        <Route path="/tenth" element={<Tenth />} />
+        <Route path="/twelfth" element={<Twelfth />} />
+        {/* 🔐 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள் */}
         <Route path='/adminlogin' element={<AdminLogin />} />
         <Route path='/masteradmin' element={<MasterAdmin />} />
+        
 
         {/* தவறான URL அடித்தால் ஹோம் பக்கத்திற்குத் திருப்ப */}
         <Route path="*" element={<Navigate to="/" replace />} />
