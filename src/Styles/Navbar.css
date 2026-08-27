@@ -1,11 +1,12 @@
-/* --- டெஸ்க்டாப் மற்றும் பொதுவான ஸ்டைல்ஸ் --- */
+/* --- டெஸ்க்டாப் & பொதுவான ஸ்டைல்ஸ் --- */
 .google-navbar {
-  background-color: #1e3a8a; /* ராயல் ப்ளூ */
-  padding: 10px 20px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+  padding: 12px 24px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  user-select: none;
 }
 
 .nav-top-row {
@@ -19,84 +20,92 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.round-logo:hover {
+  transform: scale(1.06);
 }
 
 .nav-search-container {
   flex: 1;
-  max-width: 600px;
+  max-width: 550px;
 }
 
 .google-search-box {
   display: flex;
   align-items: center;
-  background-color: white;
-  border-radius: 8px;
-  padding: 6px 12px;
+  background-color: #ffffff;
+  border-radius: 30px;
+  padding: 8px 18px;
   position: relative;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .search-icon {
   color: #64748b;
-  margin-right: 8px;
+  margin-right: 10px;
 }
 
 .search-input {
   border: none;
   outline: none;
   width: 100%;
-  font-size: 14px;
+  font-size: 14.5px;
   color: #1e293b;
+  background: transparent;
 }
 
 .clear-icon {
   cursor: pointer;
   color: #94a3b8;
-  padding: 0 4px;
+  padding: 0 6px;
+  font-weight: bold;
 }
 
 .nav-profile-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
 }
 
-.nav-cart {
-  font-size: 22px;
-  position: relative;
-  cursor: pointer;
-  color: white;
+.user-profile-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.cart-badge {
-  position: absolute;
-  top: -5px;
-  right: -10px;
-  background-color: #ef4444;
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 50%;
+.user-name-badge {
+  font-weight: 600;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 6px 14px;
+  border-radius: 20px;
+  fontSize: 14px;
 }
 
-.nav-login-btn {
-  background-color: white;
+.nav-login-btn, .nav-logout-btn {
+  background-color: #ffffff;
   color: #1e3a8a;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 8px 22px;
+  border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.2s;
 }
 
-.nav-login-btn:hover {
-  background-color: #f1f5f9;
+.nav-logout-btn {
+  background-color: #ef4444;
+  color: #ffffff;
 }
 
 .nav-bottom-tabs {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .tabs-list {
@@ -104,139 +113,252 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  gap: 15px;
+  gap: 8px;
   overflow-x: auto;
-  /* [🌟 வெள்ளை கோட்டை மறைக்க இந்த 3 வரிகள் முக்கியம்] */
-  scrollbar-width: none; /* Firefox-க்காக */
-  -ms-overflow-style: none; /* IE-க்காக */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  align-items: center;
 }
 
-/* Chrome, Safari-ல் வெள்ளை ஸ்க்ரோல் பார் வராமல் தடுக்க */
 .tabs-list::-webkit-scrollbar {
   display: none; 
 }
 
 .tab-item a {
-  color: #cbd5e1;
+  color: #e2e8f0;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  padding: 8px 12px;
+  padding: 8px 14px;
   display: block;
   white-space: nowrap;
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
 .tab-item.active a, .tab-item a:hover {
   color: white;
+  background-color: rgba(255, 255, 255, 0.15);
   font-weight: bold;
 }
 
-/* மொபைலில் மட்டும் ஆரம்பத்தில் மறைய வேண்டியவை */
+/* --- 📂 Dropdown Menu Styles --- */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-btn-title {
+  color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.dropdown-btn-title:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.dropdown-menu-box {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background-color: #ffffff;
+  min-width: 210px;
+  box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.25);
+  z-index: 9999;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 8px 0;
+  animation: fadeInDrop 0.2s ease-out;
+}
+
+.dropdown-menu-box a {
+  color: #334155 !important;
+  padding: 10px 18px !important;
+  text-decoration: none !important;
+  display: block !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  white-space: nowrap !important;
+}
+
+.dropdown-menu-box a:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f766e !important;
+  padding-left: 22px !important;
+}
+
+@keyframes fadeInDrop {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .mobile-menu-toggle-btn, .mobile-menu-header {
   display: none;
 }
 
-/* --- மொபைல் வியூ மீடியா குவாரி 📱 --- */
+/* --- 📱 Mobile App View Styles --- */
 @media screen and (max-width: 768px) {
+  .google-navbar {
+    padding: 10px 15px;
+  }
+
   .mobile-menu-toggle-btn {
-    display: block;
-    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
     border: none;
     color: white;
-    font-size: 24px;
+    font-size: 20px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
     cursor: pointer;
-    z-index: 1001;
   }
 
   .desktop-only-logo, .desktop-only-actions {
     display: none;
   }
 
-  .nav-top-row {
-    gap: 10px;
-  }
-
-  .nav-search-container {
-    max-width: 100%;
-  }
-
   .nav-bottom-tabs {
     display: none;
-    position: absolute;
-    top: 60px;
+    position: fixed;
+    top: 0;
     left: 0;
-    width: 100%;
+    width: 85%;
+    height: 100vh;
     background-color: #0f172a; 
-    box-shadow: 0 10px 15px rgba(0,0,0,0.3);
-    z-index: 1000;
-    margin-top: 0;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.6);
+    z-index: 2000;
+    overflow-y: auto;
   }
 
   .nav-bottom-tabs.mobile-open {
     display: block;
-    animation: slideDownMenu 0.25s ease-out;
+    animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .mobile-menu-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    background-color: #1e3a8a;
-    padding: 20px;
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    padding: 35px 20px;
     gap: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
   .mobile-menu-logo {
-    width: 60px;
-    height: 60px;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
-    border: 2px solid white;
+    border: 3px solid white;
   }
 
-  .mobile-menu-user-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .mobile-menu-login-btn {
+  .mobile-logout-btn, .mobile-menu-login-btn {
     background-color: #ffffff;
     color: #1e3a8a;
     border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 10px 16px;
+    border-radius: 20px;
     font-weight: bold;
-    font-size: 13px;
+    font-size: 14px;
+    width: 100%;
     cursor: pointer;
+  }
+
+  .mobile-logout-btn {
+    background-color: #ef4444;
+    color: #ffffff;
   }
 
   .tabs-list {
     flex-direction: column;
-    gap: 0;
-    overflow-x: visible;
-    padding: 10px 0;
+    gap: 6px;
+    padding: 20px 12px;
   }
 
-  .tab-item {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .tab-item a {
-    padding: 14px 20px;
-    color: #e2e8f0;
+  .tab-item a, .dropdown-btn-title {
+    padding: 12px 18px;
+    color: #cbd5e1;
     font-size: 15px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .tab-item.active {
-    background-color: rgba(30, 58, 138, 0.4);
+  .dropdown-menu-box {
+    position: static;
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    margin-top: 6px;
+    margin-left: 10px;
+    padding-left: 5px;
+    border-left: 3px solid #38bdf8;
+    min-width: unset;
   }
-  
-  .tab-item.active a {
-    color: #38bdf8;
+
+  .dropdown-menu-box a {
+    color: #94a3b8 !important;
+    padding: 10px 14px !important;
+  }
+
+  .dropdown-menu-box a:hover {
+    color: white !important;
+    background: rgba(255,255,255,0.05) !important;
+    padding-left: 18px !important;
   }
 }
 
-@keyframes slideDownMenu {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+/* --- டெஸ்க்டாப்பில் டிராப்-டவுன் மற்றும் தப்புகள் வராமல் தடுக்க --- */
+@media screen and (min-width: 769px) {
+  .nav-bottom-tabs {
+    display: block !important;
+    position: static !important;
+    height: auto !important;
+    width: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .tabs-list {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: visible !important;
+  }
+
+  .dropdown-container {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  .dropdown-menu-box {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    background-color: #ffffff !important;
+    min-width: 220px !important;
+    box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.3) !important;
+    z-index: 99999 !important;
+    border-radius: 10px !important;
+    display: block !important; /* கிளிக் செய்தவுடன் காட்ட */
+  }
 }
