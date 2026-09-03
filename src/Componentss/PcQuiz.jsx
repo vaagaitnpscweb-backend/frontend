@@ -81,7 +81,7 @@ function PcQuiz() {
       }
 
       const options = {
-        key: "rzp_test_TCtg24wJm0gqRH",
+        key: "rzp_live_TXSfHBesNhHuXM",
         amount: orderData.amount,
         currency: "INR",
         name: "Vaagai Tuition",
