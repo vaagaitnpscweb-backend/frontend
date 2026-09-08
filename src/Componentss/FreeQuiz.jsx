@@ -7,14 +7,23 @@ const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 function FreeQuiz() {
   const navigate = useNavigate();
 
-  // 🔐 Current Logged-in User Check
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isMasterAdmin = currentUser.email === 'abcdanand970@gmail.com' || currentUser.role === 'admin';
+
+  // 🔔 In-Page Alert State
+  const [pageAlert, setPageAlert] = useState({ show: false, message: '', type: 'info' });
+
+  const triggerAlert = (message, type = 'info') => {
+    setPageAlert({ show: true, message, type });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      setPageAlert({ show: false, message: '', type: 'info' });
+    }, 4000);
+  };
 
   const [onlineTests, setOnlineTests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Exam States
   const [activeTest, setActiveTest] = useState(null);
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [examStarted, setExamStarted] = useState(false);
@@ -24,18 +33,16 @@ function FreeQuiz() {
   const [showReview, setShowReview] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
 
-  // Exam History & Points
   const [examHistory, setExamHistory] = useState([]);
   const [totalPoints, setTotalPoints] = useState(0);
 
-  // 🔄 Fetch tests with proper auth header to prevent 401 error
   const fetchTests = () => {
     const headers = {
       'Content-Type': 'application/json',
       'user-email': currentUser.email || 'abcdanand970@gmail.com'
     };
 
-    fetch(`${API_BASE}/api/admin/all-tests`, { headers })
+    fetch(`${API_BASE}/api/tests/public`, { headers })
       .then(res => res.json())
       .then(data => {
         if (data && data.success && Array.isArray(data.tests)) {
@@ -63,7 +70,6 @@ function FreeQuiz() {
     fetchTests();
   }, [currentUser.email]);
 
-  // ⏱️ Timer Logic
   useEffect(() => {
     if (!examStarted || examCompleted) return;
     if (timeLeft <= 0) {
@@ -74,36 +80,45 @@ function FreeQuiz() {
     return () => clearTimeout(timer);
   }, [timeLeft, examStarted, examCompleted]);
 
-  // 🕒 Schedule Status Helper (Upcoming / Live / Expired)
   const getTestScheduleStatus = (test) => {
-    const now = new Date().getTime();
-    const start = test.startTime ? new Date(test.startTime).getTime() : null;
-    const end = test.endTime ? new Date(test.endTime).getTime() : null;
-
-    if (start && now < start) {
-      return { status: 'UPCOMING', label: `⏳ Starts at ${new Date(start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` };
+    if (!test.startTime) {
+      return { status: 'LIVE', label: '🟢 Live Now' };
     }
-    if (end && now > end) {
+
+    const now = new Date().getTime();
+    const startTimeMs = new Date(test.startTime).getTime();
+    const durationMs = (Number(test.durationMinutes) || 15) * 60 * 1000;
+    const endTimeMs = test.endTime ? new Date(test.endTime).getTime() : (startTimeMs + durationMs);
+
+    if (now < startTimeMs) {
+      const formattedStartTime = new Date(test.startTime).toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      return { status: 'UPCOMING', label: `⏳ Starts at ${formattedStartTime}` };
+    }
+
+    if (now > endTimeMs) {
       return { status: 'EXPIRED', label: '❌ Test Ended' };
     }
+
     return { status: 'LIVE', label: '🟢 Live Now' };
   };
 
   const handleStartTest = async (test) => {
-    // 🛡️ Login check
     if (!currentUser.email) {
-      alert("⚠️ தயவுசெய்து முதலில் லாகின் செய்யவும்!");
+      triggerAlert("Please log in first to attend the test!", "warning");
       return;
     }
 
-    // 🕒 Schedule Time Verification
     const schedule = getTestScheduleStatus(test);
     if (schedule.status === 'UPCOMING' && !isMasterAdmin) {
-      alert(`⚠️ இந்தத் தேர்வு இன்னும் தொடங்கவில்லை! தொடங்கும் நேரம்: ${new Date(test.startTime).toLocaleString()}`);
+      triggerAlert(`This test has not started yet. Starts at: ${new Date(test.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`, "warning");
       return;
     }
     if (schedule.status === 'EXPIRED' && !isMasterAdmin) {
-      alert("⚠️ இந்தத் தேர்வுக்கான கால அவகாசம் முடிந்துவிட்டது!");
+      triggerAlert("This test has already expired!", "error");
       return;
     }
 
@@ -118,8 +133,8 @@ function FreeQuiz() {
         let testQns = [];
         const rawTopics = test.selectedTopics && test.selectedTopics.length > 0
           ? test.selectedTopics
-          : [test.topic || 'தமிழ்'];
-        
+          : [test.topic || 'Tamil'];
+
         const cleanTopics = rawTopics.map(t => t.trim().toLowerCase());
 
         if (test.selectionType === 'selective' && test.selectedQuestionIds && test.selectedQuestionIds.length > 0) {
@@ -132,7 +147,6 @@ function FreeQuiz() {
           testQns = matched.slice(0, test.totalQuestions || 20);
         }
 
-        // Fallback: If no topic matched exactly, pick questions from available pool
         if (testQns.length === 0) {
           testQns = data.questions.slice(0, test.totalQuestions || 20);
         }
@@ -144,11 +158,10 @@ function FreeQuiz() {
         setCurrentQuestionIndex(0);
         setSelectedAnswers({});
       } else {
-        alert("⚠️ வினா வங்கியில் வினாக்கள் எதுவும் கிடைக்கவில்லை!");
+        triggerAlert("No questions found for this test!", "error");
       }
     } catch (err) {
-      console.error(err);
-      alert("❌ சர்வருடன் இணைக்க முடியவில்லை!");
+      triggerAlert("Unable to connect to the server!", "error");
     } finally {
       setLoading(false);
     }
@@ -177,7 +190,7 @@ function FreeQuiz() {
     setTotalPoints(newTotalPoints);
 
     const newResult = {
-      testTitle: activeTest ? activeTest.title : 'Model Test',
+      testTitle: activeTest ? activeTest.title : 'Mock Test',
       date: new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' }),
       time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       obtainedScore: score,
@@ -193,15 +206,13 @@ function FreeQuiz() {
   };
 
   const clearHistory = () => {
-    if (!isMasterAdmin) {
-      alert("⚠️ Master Admin-க்கு மட்டுமே அனுமதி உண்டு!");
-      return;
-    }
-    if (window.confirm("தேர்வு வரலாற்றை நீக்க விரும்புகிறீர்களா?")) {
+    if (!isMasterAdmin) return triggerAlert("Only Master Admin can clear test history!", "error");
+    if (window.confirm("Do you want to clear your test history?")) {
       const historyKey = `vaagai_quiz_history_${currentUser.email || 'guest'}`;
       localStorage.removeItem(historyKey);
       setExamHistory([]);
       setTotalPoints(0);
+      triggerAlert("Test history cleared!", "info");
     }
   };
 
@@ -214,27 +225,35 @@ function FreeQuiz() {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '60px 20px', fontSize: '1.2rem', color: '#0d9488', fontWeight: 'bold' }}>
-        🔄 தேர்வுகள் லோட் ஆகின்றன... காத்திருக்கவும்.
+        🔄 Loading tests... Please wait.
       </div>
     );
   }
 
   return (
     <div className="quiz-page-container">
+      {/* 🔔 Floating In-Page Banner Alert */}
+      {pageAlert.show && (
+        <div className={`inpage-toast ${pageAlert.type}`}>
+          <span>{pageAlert.type === 'success' ? '✅' : pageAlert.type === 'error' ? '❌' : '⚠️'}</span>
+          <span>{pageAlert.message}</span>
+        </div>
+      )}
+
       {!examStarted && !examCompleted && (
         <div className="quiz-dashboard-flow">
           <div className="quiz-start-card" style={{ background: '#ffffff', padding: '25px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.06)', marginBottom: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-              <h2 style={{ color: '#0f766e', margin: 0 }}>🏆 ஆன்லைன் மாதிரித் தேர்வுகள் (Mock Tests)</h2>
+              <h2 style={{ color: '#0f766e', margin: 0 }}>🏆 Online Mock Tests</h2>
               {currentUser.email && (
                 <div style={{ background: '#ccfbf1', color: '#0f766e', padding: '6px 14px', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px' }}>
-                  ⭐ எனது மொத்த புள்ளிகள்: {totalPoints} Points
+                  ⭐ Total Points: {totalPoints} Points
                 </div>
               )}
             </div>
 
             {onlineTests.length === 0 ? (
-              <p style={{ color: '#64748b', textAlign: 'center', padding: '20px' }}>தற்போது தேர்வுகள் எதுவும் செயல்பாட்டில் இல்லை.</p>
+              <p style={{ color: '#64748b', textAlign: 'center', padding: '20px' }}>No live tests available right now.</p>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '16px' }}>
                 {onlineTests.map((t) => {
@@ -247,18 +266,18 @@ function FreeQuiz() {
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
                           <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                            {t.examType || 'TNPSC'}
+                            {t.examType || 'General'}
                           </span>
                           <span style={{ background: t.isFree ? '#dcfce7' : '#fef9c3', color: t.isFree ? '#15803d' : '#854d0e', padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold' }}>
-                            {t.isFree ? '🎉 FREE TEST' : `💳 ₹${t.price}`}
+                            {t.isFree ? '🎉 FREE' : `💳 ₹${t.price}`}
                           </span>
                         </div>
 
                         <h3 style={{ margin: '10px 0 6px 0', color: '#1e293b', fontSize: '16px' }}>{t.title}</h3>
 
                         <div style={{ fontSize: '12.5px', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span>📊 வினாக்கள்: <b>{t.totalQuestions} Qns</b></span>
-                          <span>⏱️ கால அளவு: <b>{t.durationMinutes} நிமிடங்கள்</b></span>
+                          <span>📊 Questions: <b>{t.totalQuestions} Qns</b></span>
+                          <span>⏱️ Duration: <b>{t.durationMinutes} Minutes</b></span>
                           <span style={{ color: isUpcoming ? '#d97706' : isExpired ? '#dc2626' : '#16a34a', fontWeight: 'bold' }}>
                             📅 {schedule.label}
                           </span>
@@ -280,7 +299,7 @@ function FreeQuiz() {
                           width: '100%'
                         }}
                       >
-                        {isUpcoming ? '⏳ காத்திருக்கவும்' : isExpired ? 'மறுபரிசீலனை செய்க' : '🚀 Start Test'}
+                        {isUpcoming ? `⏳ Please Wait (${schedule.label.replace('⏳ Starts at ', '')})` : isExpired ? 'Test Expired' : '🚀 Start Test'}
                       </button>
                     </div>
                   );
@@ -291,7 +310,7 @@ function FreeQuiz() {
 
           <div className="quiz-history-card">
             <div className="history-header">
-              <h3>📜 தேர்வு செயல்திறன் வரலாறு (Exam Performance)</h3>
+              <h3>📜 Exam Performance History</h3>
               {isMasterAdmin && examHistory.length > 0 && (
                 <button className="clear-history-btn" onClick={clearHistory}>🗑️ Clear History (Admin)</button>
               )}
@@ -328,22 +347,21 @@ function FreeQuiz() {
               </div>
             ) : (
               <div className="no-history-box">
-                👋 நீங்கள் இன்னும் எந்தத் தேர்வையும் எழுதவில்லை. மேலே உள்ள தேர்வைத் தேர்ந்தெடுத்துத் தொடங்கவும்!
+                👋 You haven't taken any tests yet. Choose a test above to start!
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* 📝 Live Exam Screen */}
       {examStarted && !examCompleted && quizQuestions.length > 0 && (
         <div className="live-exam-box">
           <div className="exam-top-status">
             <span className="question-counter">Question: <strong>{currentQuestionIndex + 1}</strong> / {totalQuestions}</span>
-            <span className={`exam-timer ${timeLeft < 300 ? 'timer-danger' : ''}`}>⏱️ நேரம்: {formatTime(timeLeft)}</span>
+            <span className={`exam-timer ${timeLeft < 300 ? 'timer-danger' : ''}`}>⏱️ Time: {formatTime(timeLeft)}</span>
           </div>
 
-          <span className="exam-cat-badge">{quizQuestions[currentQuestionIndex].topic || quizQuestions[currentQuestionIndex].category || "தமிழ்"}</span>
+          <span className="exam-cat-badge">{quizQuestions[currentQuestionIndex].topic || quizQuestions[currentQuestionIndex].category || "General"}</span>
           <div className="quiz-question-section">
             <h3>{quizQuestions[currentQuestionIndex].question}</h3>
           </div>
@@ -371,26 +389,25 @@ function FreeQuiz() {
         </div>
       )}
 
-      {/* 📊 Result Screen */}
       {examCompleted && (
         <div className="result-and-review-wrapper">
           <div className="quiz-result-card">
-            <h2>📊 தேர்வு முடிவுகள் (Exam Results)</h2>
+            <h2>📊 Exam Results</h2>
             <div className="result-score-circle">
               <span className="user-score">{score}</span>
               <span className="total-score">/ {totalQuestions}</span>
             </div>
-            <p className="result-feedback">{score >= (totalQuestions / 2) ? "🎉 அருமை! உங்கள் மதிப்பெண் சேமிக்கப்பட்டது!" : "👍 தொடர்ந்து பயிற்சி செய்யுங்கள்!"}</p>
+            <p className="result-feedback">{score >= (totalQuestions / 2) ? "🎉 Great job! Your score was recorded successfully." : "👍 Keep practicing to improve your score!"}</p>
 
             <div className="result-summary-grid">
-              <div className="summary-item correct">✅ சரி: <strong>{score}</strong></div>
-              <div className="summary-item wrong">❌ தவறு: <strong>{totalQuestions - score}</strong></div>
-              <div className="summary-item percentage">📈 சதவீதம்: <strong>{totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%</strong></div>
+              <div className="summary-item correct">✅ Correct: <strong>{score}</strong></div>
+              <div className="summary-item wrong">❌ Wrong: <strong>{totalQuestions - score}</strong></div>
+              <div className="summary-item percentage">📈 Percentage: <strong>{totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0}%</strong></div>
             </div>
 
             <div className="result-action-buttons">
               <button className="review-toggle-btn" onClick={() => setShowReview(!showReview)}>
-                {showReview ? "👁️ Hide Review" : "📄 விடைகளைச் சரிபார்க்க (Review)"}
+                {showReview ? "👁️ Hide Review" : "📄 Review Answers"}
               </button>
               <button className="restart-exam-btn" onClick={() => {
                 setExamStarted(false);
@@ -400,25 +417,24 @@ function FreeQuiz() {
                 setSelectedAnswers({});
                 fetchTests();
               }}>
-                🏠 முகப்புப் பக்கத்திற்குச் செல்க
+                🏠 Return to Tests
               </button>
             </div>
           </div>
 
-          {/* 📄 Answer Analysis & Review */}
           {showReview && (
             <div className="answer-review-section">
-              <h3 className="review-title">📝 விடைப் பகுப்பாய்வு (Answer Review)</h3>
+              <h3 className="review-title">📝 Answer Analysis & Review</h3>
               {quizQuestions.map((q, index) => {
                 const userAnswer = selectedAnswers[index];
                 const isCorrect = userAnswer === q.correctAnswer;
                 return (
                   <div key={q.id || index} className={`review-card-item ${isCorrect ? 'item-correct' : 'item-wrong'}`}>
                     <div className="review-item-header">
-                      <span className="review-index">வினா {index + 1}</span>
-                      <span className="review-cat">{q.topic || q.category || "தமிழ்"}</span>
+                      <span className="review-index">Question {index + 1}</span>
+                      <span className="review-cat">{q.topic || q.category || "General"}</span>
                       <span className={`review-status-badge ${isCorrect ? 'status-pass' : 'status-fail'}`}>
-                        {isCorrect ? "சரி (Correct)" : userAnswer ? "தவறு (Wrong)" : "எழுதப்படவில்லை (Unattempted)"}
+                        {isCorrect ? "Correct" : userAnswer ? "Wrong" : "Unattempted"}
                       </span>
                     </div>
                     <h4>{q.question}</h4>
@@ -430,7 +446,7 @@ function FreeQuiz() {
                         return (
                           <div key={oIdx} className={optClass}>
                             <span className="opt-indicator">{opt === q.correctAnswer ? "✅" : opt === userAnswer ? "❌" : "•"}</span>
-                            {opt} {opt === userAnswer && <span className="user-choice-tag">(நீங்கள் தேர்வு செய்தது)</span>}
+                            {opt} {opt === userAnswer && <span className="user-choice-tag">(Your Choice)</span>}
                           </div>
                         );
                       })}
