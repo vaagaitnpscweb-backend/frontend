@@ -8,6 +8,59 @@
   color: #1e293b;
   background-color: #f8fafc;
   min-height: 90vh;
+  position: relative;
+}
+
+/* 🔔 In-Page Floating Banner Alert / Toast */
+.inpage-toast {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  animation: slideInToast 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInToast {
+  from {
+    transform: translateY(-25px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.inpage-toast.success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1.5px solid #a7f3d0;
+}
+
+.inpage-toast.error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1.5px solid #fecaca;
+}
+
+.inpage-toast.warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1.5px solid #fde68a;
+}
+
+.inpage-toast.info {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1.5px solid #bfdbfe;
 }
 
 /* Dashboard Cards */
