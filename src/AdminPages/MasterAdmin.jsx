@@ -1,10 +1,9 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/MasterAdmin.css';
 import logoImg from '../assets/logoImg.jpeg';
 import { fetchTamilWord } from '../utils/tamilTransliterate';
 
-//const API_BASE = 'http://localhost:5000';
 const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 
 function MasterAdmin() {
@@ -61,6 +60,7 @@ function MasterAdmin() {
   // ➕ Question Modal States
   const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [selectedRadioIndex, setSelectedRadioIndex] = useState(null);
   const [questionFormData, setQuestionFormData] = useState({
     topic: 'தமிழ்',
     question: '',
@@ -277,7 +277,11 @@ function MasterAdmin() {
         const newText = words.join(' ') + (e.key === ' ' ? ' ' : '');
         const updatedOptions = [...questionFormData.options];
         updatedOptions[index] = newText;
-        setQuestionFormData({ ...questionFormData, options: updatedOptions });
+        setQuestionFormData({
+          ...questionFormData,
+          options: updatedOptions,
+          correctAnswer: selectedRadioIndex === index ? newText.trim() : questionFormData.correctAnswer
+        });
       }
     }
   };
@@ -299,20 +303,49 @@ function MasterAdmin() {
 
   const handleOpenAddQuestion = () => {
     setEditingQuestionId(null);
-    setQuestionFormData({ topic: selectedTopicTab !== 'All' ? selectedTopicTab : 'தமிழ்', question: '', options: ['', '', '', ''], correctAnswer: '' });
+    setSelectedRadioIndex(null);
+    setQuestionFormData({
+      topic: selectedTopicTab !== 'All' ? selectedTopicTab : 'தமிழ்',
+      question: '',
+      options: ['', '', '', ''],
+      correctAnswer: ''
+    });
     setShowQuestionModal(true);
   };
 
   const handleOpenEditQuestion = (q) => {
     setEditingQuestionId(q.id || q._id);
-    setQuestionFormData({ topic: q.topic || q.category || 'தமிழ்', question: q.question || '', options: q.options || ['', '', '', ''], correctAnswer: q.correctAnswer || '' });
+    const options = q.options && q.options.length ? q.options : ['', '', '', ''];
+    const corrAns = q.correctAnswer || '';
+    const foundIdx = options.findIndex(opt => opt && opt.trim() === corrAns.trim());
+    setSelectedRadioIndex(foundIdx !== -1 ? foundIdx : null);
+
+    setQuestionFormData({
+      topic: q.topic || q.category || 'தமிழ்',
+      question: q.question || '',
+      options: options,
+      correctAnswer: corrAns
+    });
     setShowQuestionModal(true);
   };
 
   const handleOptionChange = (index, value) => {
     const updatedOptions = [...questionFormData.options];
     updatedOptions[index] = value;
-    setQuestionFormData({ ...questionFormData, options: updatedOptions });
+    setQuestionFormData({
+      ...questionFormData,
+      options: updatedOptions,
+      correctAnswer: selectedRadioIndex === index ? value.trim() : questionFormData.correctAnswer
+    });
+  };
+
+  const handleSelectRadioOption = (index) => {
+    setSelectedRadioIndex(index);
+    const chosenVal = questionFormData.options[index] ? questionFormData.options[index].trim() : '';
+    setQuestionFormData({
+      ...questionFormData,
+      correctAnswer: chosenVal
+    });
   };
 
   const handleSaveQuestion = async (e) => {
@@ -323,16 +356,15 @@ function MasterAdmin() {
       return;
     }
 
-    if (!questionFormData.correctAnswer) {
-      alert("⚠️ தயவுசெய்து சரியான விடையைத் தேர்ந்தெடுக்கவும்!");
+    const cleanedOptions = questionFormData.options.map(opt => (opt ? opt.trim() : ''));
+    if (cleanedOptions.some(opt => !opt)) {
+      alert("⚠️ தயவுசெய்து 4 விடைகளையும் (Options A, B, C, D) முழுமையாக நிரப்பவும்!");
       return;
     }
 
-    const cleanedOptions = questionFormData.options.map(opt => (opt ? opt.trim() : ''));
-    const trimmedCorrectAnswer = questionFormData.correctAnswer.trim();
-
-    if (!cleanedOptions.includes(trimmedCorrectAnswer)) {
-      alert("⚠️ சரியான விடையானது கொடுக்கப்பட்டுள்ள விருப்பங்களில் (Options) ஒன்றாக இருக்க வேண்டும்!");
+    const trimmedCorrectAnswer = questionFormData.correctAnswer ? questionFormData.correctAnswer.trim() : '';
+    if (!trimmedCorrectAnswer || !cleanedOptions.includes(trimmedCorrectAnswer)) {
+      alert("⚠️ சரியான விடையைத் தேர்வு செய்ய ஏதேனும் ஒரு ரேடியோ பட்டனைக் கிளிக் செய்யவும்!");
       return;
     }
 
@@ -442,20 +474,51 @@ function MasterAdmin() {
   // Online Mock Test Handlers
   const handleOpenAddTest = () => {
     setEditingTestId(null);
-    setTestFormData({ examType: 'Online Test', title: '', selectedTopics: ['தமிழ்'], selectionType: 'random', selectedQuestionIds: [], totalQuestions: 20, durationMinutes: 15, isFree: true, price: 0, startTime: '', endTime: '' });
+    setTestFormData({
+      examType: 'Online Test',
+      title: '',
+      selectedTopics: ['தமிழ்'],
+      selectionType: 'random',
+      selectedQuestionIds: [],
+      totalQuestions: 20,
+      durationMinutes: 15,
+      isFree: true,
+      price: 0,
+      startTime: '',
+      endTime: ''
+    });
     setShowTestModal(true);
   };
 
   const handleOpenEditTest = (t) => {
     setEditingTestId(t.id || t._id);
-    setTestFormData({ examType: t.examType || 'Online Test', title: t.title || '', selectedTopics: t.selectedTopics || ['தமிழ்'], selectionType: t.selectionType || 'random', selectedQuestionIds: t.selectedQuestionIds || [], totalQuestions: t.totalQuestions || 20, durationMinutes: t.durationMinutes || 15, isFree: t.isFree ?? true, price: t.price || 0, startTime: t.startTime ? t.startTime.substring(0, 16) : '', endTime: t.endTime ? t.endTime.substring(0, 16) : '' });
+    const formatForInput = (d) => {
+      if (!d) return '';
+      const dateObj = new Date(d);
+      if (Number.isNaN(dateObj.getTime())) return '';
+      return new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+
+    setTestFormData({
+      examType: t.examType || 'Online Test',
+      title: t.title || '',
+      selectedTopics: t.selectedTopics || ['தமிழ்'],
+      selectionType: t.selectionType || 'random',
+      selectedQuestionIds: t.selectedQuestionIds || [],
+      totalQuestions: t.totalQuestions || 20,
+      durationMinutes: t.durationMinutes || 15,
+      isFree: t.isFree ?? true,
+      price: t.price || 0,
+      startTime: formatForInput(t.startTime),
+      endTime: formatForInput(t.endTime)
+    });
     setShowTestModal(true);
   };
 
   const handleToggleTopicCheckbox = (topic) => {
     const current = testFormData.selectedTopics || [];
     if (current.includes(topic)) {
-      if (current.length === 1) return alert("⚠️ குறைந்தபட்சம் 1 பாடமாவது வேண்டும்!");
+      if (current.length === 1) return alert("⚠️ குறைந்தபட்சம் 1 பாடமாவது தேர்வு செய்ய வேண்டும்!");
       setTestFormData({ ...testFormData, selectedTopics: current.filter(t => t !== topic) });
     } else {
       setTestFormData({ ...testFormData, selectedTopics: [...current, topic] });
@@ -466,7 +529,7 @@ function MasterAdmin() {
     e.preventDefault();
 
     if (!testFormData.title.trim()) {
-      alert('⚠️ Test title-ஐ உள்ளிடவும்.');
+      alert('⚠️ தயவுசெய்து Test Title-ஐ உள்ளிடவும்.');
       return;
     }
 
@@ -475,15 +538,42 @@ function MasterAdmin() {
       return;
     }
 
-    if (Number(testFormData.totalQuestions) < 1) {
-      alert('⚠️ குறைந்தபட்சம் 1 question வேண்டும்.');
+    const qCount = Number(testFormData.totalQuestions);
+    if (Number.isNaN(qCount) || qCount < 1) {
+      alert('⚠️ வினாக்களின் எண்ணிக்கை குறைந்தபட்சம் 1 இருக்க வேண்டும்.');
       return;
     }
 
-    if (Number(testFormData.durationMinutes) < 1) {
-      alert('⚠️ Test duration குறைந்தபட்சம் 1 minute இருக்க வேண்டும்.');
+    const duration = Number(testFormData.durationMinutes);
+    if (Number.isNaN(duration) || duration < 1) {
+      alert('⚠️ தேர்வு கால அளவு குறைந்தபட்சம் 1 நிமிடம் இருக்க வேண்டும்.');
       return;
     }
+
+    // Convert local datetime string to accurate ISO String
+    const formattedStartTime = testFormData.startTime ? new Date(testFormData.startTime).toISOString() : null;
+    const formattedEndTime = testFormData.endTime ? new Date(testFormData.endTime).toISOString() : null;
+
+    if (formattedStartTime && formattedEndTime && new Date(formattedStartTime) >= new Date(formattedEndTime)) {
+      alert('⚠️ தேர்வு முடியும் நேரம் (End Time) தொடங்கும் நேரத்திற்குப் பிறகு இருக்க வேண்டும்!');
+      return;
+    }
+
+    const payload = {
+      id: editingTestId,
+      examType: testFormData.examType,
+      title: testFormData.title.trim(),
+      selectedTopics: testFormData.selectedTopics,
+      selectionType: testFormData.selectionType || 'random',
+      selectedQuestionIds: testFormData.selectedQuestionIds || [],
+      totalQuestions: qCount,
+      durationMinutes: duration,
+      isFree: Boolean(testFormData.isFree),
+      price: testFormData.isFree ? 0 : Number(testFormData.price || 0),
+      startTime: formattedStartTime,
+      endTime: formattedEndTime,
+      status: 'active'
+    };
 
     const endpoint = editingTestId ? `${API_BASE}/api/admin/edit-test` : `${API_BASE}/api/admin/add-test`;
     const method = editingTestId ? 'PUT' : 'POST';
@@ -491,22 +581,25 @@ function MasterAdmin() {
     try {
       const res = await fetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json', 'user-email': currentUser.email || 'abcdanand970@gmail.com' },
-        body: JSON.stringify({ id: editingTestId, ...testFormData, status: 'active' })
+        headers: {
+          'Content-Type': 'application/json',
+          'user-email': currentUser.email || 'abcdanand970@gmail.com'
+        },
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        alert(data.message || '❌ Test save failed.');
+        alert(data.message || '❌ தேர்வு விவரங்களைச் சேமிக்க முடியவில்லை.');
         return;
       }
 
       setShowTestModal(false);
       loadAllData();
-      alert('🎉 தேர்வு உருவாக்கப்பட்டது!');
+      alert('🎉 ஆன்லைன் தேர்வு வெற்றிகரமாக உருவாக்கப்பட்டது/புதுப்பிக்கப்பட்டது!');
     } catch (err) {
       console.error('Test save error:', err);
-      alert('❌ Server connection error.');
+      alert('❌ சர்வருடன் இணைக்க முடியவில்லை. Backend சரிபார்க்கவும்.');
     }
   };
 
@@ -519,7 +612,12 @@ function MasterAdmin() {
   };
 
   const handleOpenTestPreview = (t) => {
-    let testQuestions = t.selectionType === 'selective' && t.selectedQuestionIds ? quizzesList.filter(q => t.selectedQuestionIds.includes(q.id || q._id)) : quizzesList.filter(q => (t.selectedTopics || []).includes(q.topic || q.category));
+    let testQuestions = [];
+    if (t.selectionType === 'selective' && t.selectedQuestionIds && t.selectedQuestionIds.length > 0) {
+      testQuestions = quizzesList.filter(q => t.selectedQuestionIds.includes(q.id || q._id));
+    } else {
+      testQuestions = quizzesList.filter(q => (t.selectedTopics || []).includes(q.topic || q.category));
+    }
     setPreviewTest({ test: t, questions: testQuestions });
   };
 
@@ -557,11 +655,11 @@ function MasterAdmin() {
 
     const payload = { 
       id: editingPdfId, 
-      title: pdfFormData.title.trim(),
+      title: pdfFormData.title.trim(), 
       examType: pdfFormData.examType, 
       questionPdfLink: pdfFormData.questionPdfLink.trim(), 
-      answerPdfLink: isSchoolExam ? '' : (pdfFormData.answerPdfLink ? pdfFormData.answerPdfLink.trim() : ''),
-      isFree: pdfFormData.isFree,
+      answerPdfLink: isSchoolExam ? '' : (pdfFormData.answerPdfLink ? pdfFormData.answerPdfLink.trim() : ''), 
+      isFree: pdfFormData.isFree, 
       price: pdfFormData.isFree ? 0 : pdfPrice, 
       status: 'active' 
     };
@@ -1188,10 +1286,10 @@ function MasterAdmin() {
                         padding: '8px 10px', 
                         borderRadius: '4px', 
                         background: isCorrect ? '#dcfce7' : '#ffffff', 
-                        border: isCorrect ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
-                        color: isCorrect ? '#15803d' : '#334155',
-                        fontWeight: isCorrect ? 'bold' : 'normal',
-                        fontSize: '13px'
+                        border: isCorrect ? '1.5px solid #16a34a' : '1px solid #cbd5e1', 
+                        color: isCorrect ? '#15803d' : '#334155', 
+                        fontWeight: isCorrect ? 'bold' : 'normal', 
+                        fontSize: '13px' 
                       }}
                     >
                       <span>{String.fromCharCode(65 + idx)})</span> {opt} {isCorrect && ' ✅'}
@@ -1341,9 +1439,15 @@ function MasterAdmin() {
                 )}
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label className="modal-label">Start Time (Optional - Schedule)</label>
-                <input type="datetime-local" value={testFormData.startTime} onChange={e => setTestFormData({ ...testFormData, startTime: e.target.value })} className="modal-input" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <label className="modal-label">Start Time (தொடங்கும் நேரம்)</label>
+                  <input type="datetime-local" value={testFormData.startTime} onChange={e => setTestFormData({ ...testFormData, startTime: e.target.value })} className="modal-input" />
+                </div>
+                <div>
+                  <label className="modal-label">End Time (முடியும் நேரம் - Optional)</label>
+                  <input type="datetime-local" value={testFormData.endTime} onChange={e => setTestFormData({ ...testFormData, endTime: e.target.value })} className="modal-input" />
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
@@ -1410,19 +1514,33 @@ function MasterAdmin() {
                 <textarea value={questionFormData.question} onChange={e => setQuestionFormData({ ...questionFormData, question: e.target.value })} onKeyDown={e => handleTamilKeyDown(e, 'question')} required className="modal-input" style={{ height: '70px' }} />
               </div>
               <div style={{ marginBottom: '14px', background: '#f8fafc', padding: '12px', borderRadius: '6px' }}>
-                <label className="modal-label" style={{ color: '#0f766e' }}>Options (Select radio for correct answer):</label>
+                <label className="modal-label" style={{ color: '#0f766e' }}>Options (விருப்பங்கள் - சரியான விடைக்கு ரேடியோ பட்டனைத் தேர்ந்தெடுக்கவும்):</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   {['A', 'B', 'C', 'D'].map((lbl, idx) => (
                     <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input type="radio" name="correctOption" checked={questionFormData.correctAnswer === questionFormData.options[idx] && questionFormData.options[idx] !== ''} onChange={() => setQuestionFormData({ ...questionFormData, correctAnswer: questionFormData.options[idx] })} />
-                      <input type="text" placeholder={`Option ${lbl}`} value={questionFormData.options[idx]} onChange={e => handleOptionChange(idx, e.target.value)} onKeyDown={e => handleOptionTamilKeyDown(e, idx)} required className="modal-input" style={{ padding: '6px' }} />
+                      <input 
+                        type="radio" 
+                        name="correctOption" 
+                        checked={selectedRadioIndex === idx} 
+                        onChange={() => handleSelectRadioOption(idx)} 
+                      />
+                      <input 
+                        type="text" 
+                        placeholder={`Option ${lbl}`} 
+                        value={questionFormData.options[idx]} 
+                        onChange={e => handleOptionChange(idx, e.target.value)} 
+                        onKeyDown={e => handleOptionTamilKeyDown(e, idx)} 
+                        required 
+                        className="modal-input" 
+                        style={{ padding: '6px' }} 
+                      />
                     </label>
                   ))}
                 </div>
               </div>
               <div style={{ marginBottom: '15px' }}>
-                <label className="modal-label">Correct Answer</label>
-                <input type="text" value={questionFormData.correctAnswer} readOnly className="modal-input" style={{ background: '#f1f5f9', fontWeight: 'bold', color: '#15803d' }} required />
+                <label className="modal-label">Correct Answer (தேர்ந்தெடுக்கப்பட்ட சரியான விடை)</label>
+                <input type="text" value={questionFormData.correctAnswer} placeholder="Select radio button above" readOnly className="modal-input" style={{ background: '#f1f5f9', fontWeight: 'bold', color: '#15803d' }} required />
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button type="button" onClick={() => setShowQuestionModal(false)} className="btn-modal-cancel">Cancel</button>
