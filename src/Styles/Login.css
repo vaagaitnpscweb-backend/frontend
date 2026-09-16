@@ -1,138 +1,199 @@
+/* 🌟 லாகின் மாடல் ஓவர்லே (Background Overlay) */
 .login-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(5px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 2000;
-  animation: fadeInOverlay 0.2s ease-out;
+  justify-content: center;
+  z-index: 99999;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
+/* 📦 மாடல் கண்டென்ட் பாக்ஸ் (Page-ஐ விட்டு வெளியே போகாதவாறு வடிவமைக்கப்பட்டது) */
 .login-modal-content {
   background: #ffffff;
-  padding: 35px;
-  border-radius: 16px;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  max-width: 400px;
+  max-height: 90vh; /* ஸ்கிரீன் உயரத்தை விட அதிகமாகாமல் இருக்க */
+  overflow-y: auto; /* உள்ளடக்கங்கள் அதிகமானால் உள்ளேயே ஸ்க்ரோல் ஆகும் */
+  padding: 30px 24px;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
   position: relative;
-  animation: slideInModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  animation: scaleUpModal 0.25s ease-in-out;
 }
 
+/* ❌ க்ளோஸ் பட்டன் */
 .modal-close-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
+  top: 14px;
+  right: 14px;
+  background: #f1f5f9;
+  color: #64748b;
   border: none;
-  font-size: 1.2rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 14px;
   cursor: pointer;
-  color: #70757a;
-  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .modal-close-btn:hover {
-  color: #ea4335;
+  background: #fee2e2;
+  color: #ef4444;
+  transform: rotate(90deg);
 }
 
+/* 📋 ஹெட்டர் பகுதி */
 .login-form-header {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+}
+
+.login-logo-badge {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin: 0 auto 12px auto;
+  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
 }
 
 .login-form-header h2 {
-  color: #1e3a8a;
-  font-size: 1.6rem;
-  margin-bottom: 8px;
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .login-form-header p {
-  color: #5f6368;
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
 }
 
+/* 📝 ஃபார்ம் மற்றும் இன்புட் ஸ்டைல்ஸ் */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  text-align: left;
+  gap: 5px;
 }
 
 .form-group label {
-  font-size: 0.88rem;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #202124;
+  color: #334155;
 }
 
-.form-group input {
-  height: 42px;
-  padding: 0 12px;
-  border: 1px solid #dfe1e5;
+.form-group input, 
+.form-group select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
   outline: none;
-  transition: border-color 0.2s;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
-.form-group input:focus {
-  border-color: #1e3a8a;
-  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+.form-group input:focus, 
+.form-group select:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* 🚀 சப்மிட் பட்டன் */
 .form-submit-btn {
-  background-color: #1e3a8a;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
   color: #ffffff;
   border: none;
-  height: 44px;
+  padding: 12px;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 14.5px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+  margin-top: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-submit-btn:hover {
-  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
+.form-submit-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 🔄 டோகிள் லிங்க் (Sign In / Create Account) */
 .form-toggle-link {
   text-align: center;
-  margin-top: 20px;
-  font-size: 0.9rem;
-  color: #5f6368;
+  margin-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+
+.form-toggle-link p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
 }
 
 .form-toggle-link span {
-  color: #1e3a8a;
+  color: #2563eb;
   font-weight: 700;
   cursor: pointer;
+  margin-left: 4px;
+}
+
+.form-toggle-link span:hover {
   text-decoration: underline;
 }
 
-@keyframes fadeInOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* ✨ மாடல் ஓபன் ஆகும் அனிமேஷன் */
+@keyframes scaleUpModal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes slideInModal {
-  from {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+/* 📱 மிகச்சிறிய மொபைல் திரைகளுக்கான அட்ஜெஸ்ட்மென்ட் */
+@media (max-width: 480px) {
+  .login-modal-content {
+    padding: 24px 18px;
   }
 }
