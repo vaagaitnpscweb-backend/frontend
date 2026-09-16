@@ -1,362 +1,470 @@
-/* மெயின் கன்டெய்னர் */
-.premium-page-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #fafafa;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-teal: #0d9488;
+  --primary-dark: #0f766e;
+  --primary-glow: rgba(13, 148, 136, 0.2);
+  --bg-color: #f8fafc;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --card-bg: #ffffff;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 16px 32px -4px rgba(15, 23, 42, 0.12);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ஹெட்டர்கள் */
+.premium-page-container {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  padding: 40px 20px 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
 .premium-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .premium-header h2 {
-  font-size: 2.2rem;
-  color: #1e293b;
-  margin-bottom: 10px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-dark);
+  margin-bottom: 8px;
 }
 
 .premium-header p {
-  color: #64748b;
-  font-size: 1.1rem;
-  max-width: 600px;
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 650px;
   margin: 0 auto;
+  line-height: 1.6;
 }
 
-/* 1. பிரீமியம் பிளான்கள் கார்டுகள் */
+/* 🏆 Subscription Plans Grid */
 .pricing-plans-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 60px;
+  gap: 28px;
+  margin-bottom: 50px;
+  align-items: stretch;
 }
 
 .pricing-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 30px;
-  text-align: center;
-  position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 32px 26px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  position: relative;
+  transition: var(--transition);
 }
 
 .pricing-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
 }
 
-/* ஆக்டிவ் / பெஸ்ட் வேல்யூ கார்டு மட்டும் தனித்து தெரிய */
-.pricing-card.active-plan {
-  border: 2px solid #0d9488;
-  box-shadow: 0 10px 30px rgba(13, 148, 136, 0.1);
+/* Plan Variants */
+.silver-card {
+  border-top: 5px solid #94a3b8;
 }
 
+.gold-card {
+  border-top: 5px solid #f59e0b;
+}
+
+.gold-card.active-plan {
+  background: #ffffff;
+  border: 2px solid #f59e0b;
+  transform: scale(1.03);
+  box-shadow: 0 12px 30px -4px rgba(245, 158, 11, 0.2);
+}
+
+.gold-card.active-plan:hover {
+  transform: scale(1.03) translateY(-6px);
+}
+
+.platinum-card {
+  border-top: 5px solid #0284c7;
+}
+
+/* Badges */
 .best-value-badge {
   position: absolute;
-  top: -15px;
+  top: -14px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #0d9488 0%, #111827 100%);
-  color: white;
-  padding: 4px 16px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  letter-spacing: 1px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 5px 14px;
+  border-radius: 99px;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
 }
 
 .plan-name {
-  font-size: 1.4rem;
+  font-size: 20px;
   font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .plan-price {
-  font-size: 2.5rem;
+  font-size: 36px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-dark);
   margin-bottom: 20px;
+  line-height: 1.1;
 }
 
+/* Features List */
 .plan-features {
   list-style: none;
   padding: 0;
-  margin: 0 0 30px 0;
-  text-align: left;
+  margin: 0 0 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
 }
 
 .plan-features li {
-  padding: 10px 0;
-  color: #475569;
-  border-bottom: 1px dashed #f1f5f9;
-  font-size: 0.95rem;
+  font-size: 14px;
+  color: #334155;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
 }
 
-.commission-feature {
-  color: #0d9488 !important;
-  font-weight: 600;
-}
-
+/* Plan Buttons */
 .buy-plan-btn {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: var(--transition);
 }
 
-.silver-btn { background: #e2e8f0; color: #334155; }
-.silver-btn:hover { background: #cbd5e1; }
-.gold-btn { background: #0d9488; color: white; }
-.gold-btn:hover { background: #0f766e; }
-.platinum-btn { background: #1e1b4b; color: white; }
-.platinum-btn:hover { background: #312e81; }
+.silver-btn {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+.silver-btn:hover {
+  background: #e2e8f0;
+}
+
+.gold-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+.gold-btn:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4);
+}
+
+.platinum-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+}
+.platinum-btn:hover {
+  background: linear-gradient(135deg, #0369a1, #075985);
+}
 
 .section-divider {
-  border: 0;
+  border: none;
   height: 1px;
-  background: #e2e8f0;
-  margin: 60px 0;
+  background: var(--border-light);
+  margin: 50px 0;
 }
 
-/* 2. புக் ஸ்டோர் செக்ஷன் */
+/* 📚 Bookstore Section */
 .store-search-container {
-  max-width: 500px;
-  margin: 0 auto 40px auto;
+  max-width: 480px;
+  margin: 0 auto 30px auto;
 }
 
 .store-search-input {
   width: 100%;
-  padding: 14px 20px;
-  border: 1px solid #cbd5e1;
-  border-radius: 30px;
-  font-size: 1rem;
+  padding: 12px 18px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 99px;
+  font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  background: #fff;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
 }
 
 .store-search-input:focus {
-  border-color: #0d9488;
+  border-color: var(--primary-teal);
+  box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .books-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .book-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-  transition: transform 0.2s;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
 }
 
 .book-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
 }
 
 .book-img {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  background-color: #f1f5f9;
 }
 
 .book-info {
-  padding: 20px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .book-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-  color: #1e293b;
-  height: 44px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-dark);
 }
 
 .book-info p {
-  margin: 0 0 15px 0;
-  color: #64748b;
-  font-size: 0.9rem;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
 }
 
 .book-price-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
 }
 
 .b-price {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #0d9488;
+  font-size: 20px;
+  font-weight: 800;
+  color: #16a34a;
 }
 
 .order-now-btn {
-  background: #0f172a;
-  color: white;
+  background: var(--primary-teal);
+  color: #fff;
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: var(--transition);
 }
 
 .order-now-btn:hover {
-  background: #334155;
+  background: var(--primary-dark);
 }
 
-/* 🌟 3. பாப்-அப் மாடல் (Popup Modal Layout) */
+/* 🛒 Modal Overlay & Box */
 .order-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .order-modal-box {
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
+  background: #ffffff;
   width: 100%;
-  max-width: 460px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  max-width: 440px;
+  border-radius: var(--radius-lg);
+  padding: 26px;
   position: relative;
-  animation: modalFadeIn 0.3s ease-out;
-}
-
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-light);
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .close-slip-btn {
   position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 1.4rem;
+  top: 18px;
+  right: 18px;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-muted);
   cursor: pointer;
-  color: #94a3b8;
+  transition: color 0.2s;
 }
 
 .close-slip-btn:hover {
-  color: #475569;
+  color: #ef4444;
 }
 
-/* 🏠 அட்ரஸ் ஃபார்ம் ஸ்டைல்ஸ் */
+.order-modal-box h3 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+/* Address & Contact Forms */
 .address-form-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 20px 0;
+  margin: 16px 0;
 }
 
-.address-input, .address-textarea {
+.address-input,
+.address-textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: inherit;
   outline: none;
-  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.address-input:focus,
+.address-textarea:focus {
+  border-color: var(--primary-teal);
 }
 
 .address-textarea {
-  height: 80px;
+  height: 70px;
   resize: none;
-}
-
-.address-input:focus, .address-textarea:focus {
-  border-color: #0d9488;
 }
 
 .place-order-confirm-btn {
   width: 100%;
-  background: #0d9488;
-  color: white;
+  padding: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
   border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 15px;
   cursor: pointer;
-  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: var(--transition);
+}
+
+.place-order-confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 .place-order-confirm-btn:disabled {
   background: #cbd5e1;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-/* 🔄 லோடிங் ஸ்பின்னர் */
+/* Spinner */
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #0d9488;
+  border: 4px solid #e2e8f0;
+  border-top-color: var(--primary-teal);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 30px auto 15px auto;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px auto;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 📄 இன்வாய்ஸ் பில் ஸ்லிப் டிசைன் */
+/* Invoice Slip */
 .invoice-slip {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 15px;
-  margin: 20px 0;
-  text-align: left;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .invoice-slip p {
-  margin: 8px 0;
-  font-size: 0.95rem;
-  color: #334155;
-  display: flex;
-  justify-content: space-between;
+  margin: 4px 0;
 }
 
 .download-slip-btn {
   width: 100%;
+  padding: 11px;
   background: #0f172a;
-  color: white;
+  color: #fff;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-weight: 700;
   cursor: pointer;
+  transition: var(--transition);
+}
+
+.download-slip-btn:hover {
+  background: #334155;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .pricing-plans-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .gold-card.active-plan {
+    transform: none;
+  }
+
+  .gold-card.active-plan:hover {
+    transform: translateY(-6px);
+  }
 }
