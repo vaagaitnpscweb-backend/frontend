@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../Styles/Mocktest.css';
+import '../Styles/MockTest.css';
 
 const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 
