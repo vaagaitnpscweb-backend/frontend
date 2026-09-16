@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import '../Styles/Footer.css';
 import logoImg from '../assets/logoImg.jpeg';
@@ -30,6 +29,8 @@ function Footer() {
             <li><Link to="/current-affairs">📰 நடப்பு நிகழ்வுகள்</Link></li>
             <li><Link to="/free-quiz">📚 இலவச தேர்வுகள்</Link></li>
             <li><Link to="/premium">💎 பிரீமியம் பேக்குகள்</Link></li>
+            {/* விதிமுறைகள் மற்றும் நிபந்தனைகள் லிங்க் சேர்க்கப்பட்டுள்ளது */}
+            <li><Link to="/terms">📜 விதிமுறைகள் & நிபந்தனைகள்</Link></li>
           </ul>
         </div>
 
