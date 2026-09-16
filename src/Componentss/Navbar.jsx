@@ -1,18 +1,19 @@
-import { useState, useEffect, useRef } from 'react'; 
-import { Link, useNavigate } from 'react-router-dom'; 
-import '../Styles/Navbar.css'; 
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import '../Styles/Navbar.css';
 import logoImg from '../assets/logoImg.jpeg';
 
 function Navbar({ setShowLogin, user, setUser }) {
   const [activeTab, setActiveTab] = useState('home');
-  const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
+  const [searchText, setSearchText] = useState('');
 
   // Dropdown States
   const [schoolOpen, setSchoolOpen] = useState(false);
   const [examOpen, setExamOpen] = useState(false);
 
   const navRef = useRef(null);
+  const navigate = useNavigate(); 
 
   // வெளியேய கிளிக் செய்தால் டிராப்-டவுன் மூடப்படும்
   useEffect(() => {
@@ -26,24 +27,25 @@ function Navbar({ setShowLogin, user, setUser }) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const navigate = useNavigate(); 
-
-  const handleSearchSubmit = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (searchQuery.trim()) {
-        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        setActiveTab(''); 
-        setIsMobileMenuOpen(false); 
-      }
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
     setIsMobileMenuOpen(false);
     navigate('/');
+  };
+
+  // 🔍 Search Submit Handler
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchText.trim()) {
+      navigate(`/search-pdfs?query=${encodeURIComponent(searchText.trim())}`);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  // ❌ Clear Search Handler
+  const handleClearSearch = () => {
+    setSearchText('');
   };
 
   return (
@@ -58,32 +60,42 @@ function Navbar({ setShowLogin, user, setUser }) {
           {isMobileMenuOpen ? '✕' : '☰'}
         </button>
 
-        {/* லோகோ */}
-        <div className="nav-logo-section desktop-only-logo">
-          <Link to="/" onClick={() => setActiveTab('home')}>
+        {/* லோகோ, பிராண்ட் பெயர் மற்றும் சர்ச் பாக்ஸ் (Center aligned) */}
+        <div className="nav-logo-search-group">
+          <Link to="/" onClick={() => setActiveTab('home')} className="brand-logo-link">
             <img src={logoImg} alt="Vaagai Logo" className="round-logo" />
+            <span className="brand-title">Vaagai Tuition Center</span>
           </Link>
+
+          {/* 🔍 Search Input Box with Search & Cancel Buttons */}
+          <form className="nav-search-form" onSubmit={handleSearchSubmit}>
+            <div className="nav-search-input-wrapper">
+              <span className="search-icon-prefix">🔍</span>
+              <input
+                type="text"
+                placeholder="PDF-களைத் தேடுங்கள்..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="nav-search-input"
+              />
+              {searchText && (
+                <button 
+                  type="button" 
+                  className="nav-search-cancel-btn" 
+                  onClick={handleClearSearch}
+                  title="Clear"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <button type="submit" className="nav-search-submit-btn">
+              Search
+            </button>
+          </form>
         </div>
 
-        {/* சர்ச் பாக்ஸ் */}
-        <div className="nav-search-container">
-          <div className="google-search-box">
-            <span className="search-icon">🔍</span>
-            <input 
-              type="text" 
-              placeholder="TNPSC, RRB, SI, PC தேர்வுகளைத் தேடுங்கள்..." 
-              className="search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchSubmit} 
-            />
-            {searchQuery && (
-              <span className="clear-icon" onClick={() => setSearchQuery('')}>✕</span>
-            )}
-          </div>
-        </div>
-
-        {/* லாகின் / அவுட் பகுதி (கார்ட் நீக்கப்பட்டது) */}
+        {/* லாகின் / அவுட் பகுதி */}
         <div className="nav-profile-actions desktop-only-actions">
           {user ? (
             <div className="user-profile-box">
@@ -100,8 +112,30 @@ function Navbar({ setShowLogin, user, setUser }) {
       <div className={`nav-bottom-tabs ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         
         <div className="mobile-menu-header">
-          <img src={logoImg} alt="Logo" className="mobile-menu-logo" />
-          <div className="mobile-menu-user-section" style={{ width: '100%' }}>
+          <div className="mobile-logo-brand-group">
+            <img src={logoImg} alt="Logo" className="mobile-menu-logo" />
+            <span className="mobile-brand-title">Vaagai Tuition Center</span>
+          </div>
+
+          {/* மொபைல் வியூவிற்கான சர்ச் பாக்ஸ் */}
+          <form className="mobile-nav-search-form" onSubmit={handleSearchSubmit}>
+            <div className="nav-search-input-wrapper">
+              <span className="search-icon-prefix">🔍</span>
+              <input
+                type="text"
+                placeholder="PDF-களைத் தேடுங்கள்..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="nav-search-input"
+              />
+              {searchText && (
+                <button type="button" className="nav-search-cancel-btn" onClick={handleClearSearch}>✕</button>
+              )}
+            </div>
+            <button type="submit" className="nav-search-submit-btn">Search</button>
+          </form>
+
+          <div className="mobile-menu-user-section" style={{ width: '100%', marginTop: '10px' }}>
             {user ? (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontWeight: 'bold', color: '#38bdf8', marginBottom: '8px' }}>
@@ -126,8 +160,8 @@ function Navbar({ setShowLogin, user, setUser }) {
             <Link to="/current-affairs" onClick={() => { setActiveTab('current-affairs'); setIsMobileMenuOpen(false); }}>📰 Daily Current Affairs</Link>
           </li>
 
-          <li className={`tab-item ${activeTab === 'free-quiz' ? 'active' : ''}`}>
-            <Link to="/free-quiz" onClick={() => { setActiveTab('free-quiz'); setIsMobileMenuOpen(false); }}>📚 Free Quiz</Link>
+          <li className={`tab-item ${activeTab === 'mocktest' ? 'active' : ''}`}>
+            <Link to="/mocktest" onClick={() => { setActiveTab('mocktest'); setIsMobileMenuOpen(false); }}>📚 Mock Test </Link>
           </li>
 
           <li className={`tab-item ${activeTab === 'premium' ? 'active' : ''}`}>
