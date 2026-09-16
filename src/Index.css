@@ -1,4 +1,10 @@
-/* வெப்சைட் முழுவதும் பேக்ரவுண்ட் நடுவில் லோகோ ஃபிக்ஸ்டா இருக்க */
+/* Navbar உயரத்திற்கு ஏற்ப மேலிருந்து தள்ளுவது */
+body {
+  margin: 0;
+  padding-top: 100px;
+}
+
+/* வெப்சைட் முழுவதும் நடுவில் மங்கலான லோகோ (Watermark) அமைப்பது */
 body::before {
   content: "";
   position: fixed;
@@ -6,17 +12,12 @@ body::before {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 400px;                      
-  height: 400px;                     
-  background-image: url('./assets/logoImg.jpeg'); /* index.css-ல் இருந்து assets-க்கான சரியான பாத் */
+  height: 400px;                      
+  background-image: url('./assets/logoImg.jpeg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  opacity: 0.06; /* மங்கலான வாட்டர்மார்க் லுக் */
+  opacity: 0.06;
   z-index: -1;   
   pointer-events: none; 
-}
-/* Navbar-ன் உயரத்திற்கு ஏற்ப அனைத்து பக்கங்களின் தொடக்கத்தையும் கீழே தள்ளுவது */
-body {
-  margin: 0;
-  padding-top: 100px;/* உங்களது Navbar உயரத்திற்கு ஏற்ப 100px முதல் 130px வரை மாற்றிக் கொள்ளலாம் */
 }
