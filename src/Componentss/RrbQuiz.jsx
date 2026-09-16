@@ -38,23 +38,58 @@ function RrbQuiz() {
     }
   }, []);
 
-  // 📄 PDF-ஐ புதிய விண்டோவில் திறக்கும் ஃபங்ஷன்
-  const handleOpenPdf = (pdfBase64OrUrl, title) => {
-    if (!pdfBase64OrUrl) {
+  // 📄 PDF-ஐ புதிய விண்டோவில் திறக்கும் ஃபங்ஷன் (சப்ஸ்கிரிப்ஷன் மற்றும் பேமெண்ட் அக்சஸ் சரிபார்ப்புடன்)
+  const handleOpenPdf = async (pdf, type = 'question') => {
+    const driveUrl = type === 'question' ? pdf.questionPdfLink : pdf.answerPdfLink;
+    const title = type === 'question' ? pdf.title : `${pdf.title} - Answer Key`;
+
+    if (!driveUrl) {
       alert("❌ PDF file is not available!");
       return;
     }
 
+    // 1. PDF முற்றிலும் இலவசம் எனில் நேரடியாகத் திறக்கலாம்
+    if (pdf.isFree) {
+      openDrivePreview(driveUrl, title);
+      return;
+    }
+
+    if (!user) {
+      alert("🔐 Please log in first to access this material!");
+      return;
+    }
+
     try {
-      if (pdfBase64OrUrl.startsWith('data:application/pdf')) {
-        const pdfWindow = window.open("");
-        pdfWindow.document.write(
-          `<iframe width='100%' height='100%' src='${pdfBase64OrUrl}' style='border:none;'></iframe>`
-        );
-        pdfWindow.document.title = title || "Vaagai Tuition Material";
+      // 2. சப்ஸ்கிரிப்ஷன் வைத்துள்ளாரா அல்லது ஏற்கனவே பணம் செலுத்தியுள்ளாரா என சரிபார்க்கவும்
+      const res = await fetch(`${API_BASE}/api/user/check-access?email=${user.email}&pdfId=${pdf.id || pdf._id}`);
+      const data = await res.json();
+
+      if (data.success && data.hasAccess) {
+        // 🟢 சப்ஸ்கிரிப்ஷன் அல்லது பேமெண்ட் செய்துள்ளார் -> டவுன்லோட் அனுமதிக்கப்படும்
+        openDrivePreview(driveUrl, title);
       } else {
-        window.open(pdfBase64OrUrl, '_blank');
+        // 🔴 கட்டணம் செலுத்த வேண்டும்
+        const confirmBuy = window.confirm(`இந்த PDF-ன் விலை ₹${pdf.price || 5}. வாகை பிரீமியம் திட்டம் அல்லது தனிப்பட்ட கட்டணம் செலுத்திப் பெற விரும்புகிறீர்களா?`);
+        if (confirmBuy) {
+          navigate('/premium');
+        }
       }
+    } catch (err) {
+      console.error("Access check error:", err);
+      alert("அக்சஸ் சரிபார்ப்பில் பிழை ஏற்பட்டது.");
+    }
+  };
+
+  const openDrivePreview = (driveUrl, title) => {
+    try {
+      let finalUrl = driveUrl.trim();
+      if (finalUrl.includes('drive.google.com')) {
+        const match = finalUrl.match(/\/d\/(.+?)\/(view|preview)?/) || finalUrl.match(/id=(.+?)(&|$)/);
+        if (match && match[1]) {
+          finalUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+        }
+      }
+      window.open(finalUrl, '_blank');
     } catch (err) {
       alert("⚠️ Unable to open PDF. Please allow popups in your browser.");
     }
@@ -83,7 +118,7 @@ function RrbQuiz() {
       }
 
       const options = {
-        key: "rzp_live_TXSfHBesNhHuXM",
+        key: "rzp_test_TCtg24wJm0gqRH",
         amount: orderData.amount,
         currency: "INR",
         name: "Vaagai Tuition",
@@ -160,7 +195,7 @@ function RrbQuiz() {
       {/* 🚂 Header */}
       <div style={{ background: '#002b49', color: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', marginBottom: '25px' }}>
         <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>🚂 RRB Railway Exam Portal</h1>
-        <p style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Mock Tests & Study Materials for NTPC, ALP & Group D Exams</p>
+        <p style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>Mock Tests & Study Materials for NTPC, ALP & Group D Exams (சப்ஸ்கிரிப்ஷன் வைத்துள்ள மாணவர்களுக்கு அனைத்து PDF-களும் முற்றிலும் இலவசம்!)</p>
       </div>
 
       {pdfList.length === 0 ? (
@@ -186,7 +221,7 @@ function RrbQuiz() {
                 const isPurchased = isFree || purchasedPdfIds.includes(Number(pdf.id));
 
                 return (
-                  <tr key={pdf.id} style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                  <tr key={pdf.id || pdf._id} style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
                     
                     {/* 1. S.No */}
                     <td style={{ padding: '14px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 'bold', color: '#334155' }}>
@@ -230,8 +265,6 @@ function RrbQuiz() {
                             boxShadow: '0 2px 4px rgba(34, 197, 94, 0.2)',
                             transition: 'all 0.2s ease'
                           }}
-                          onMouseOver={(e) => e.target.style.background = '#16a34a'}
-                          onMouseOut={(e) => e.target.style.background = '#22c55e'}
                         >
                           💳 Pay ₹{pdf.price || 5} to Unlock
                         </button>
@@ -240,7 +273,7 @@ function RrbQuiz() {
                           
                           {/* Download Link */}
                           <button 
-                            onClick={() => handleOpenPdf(pdf.questionPdfLink, pdf.title)}
+                            onClick={() => handleOpenPdf(pdf, 'question')}
                             style={{ 
                               background: 'none', 
                               border: 'none', 
@@ -251,7 +284,7 @@ function RrbQuiz() {
                               textDecoration: 'underline' 
                             }}
                           >
-                            பதிவிறக்கம் (Question PDF)
+                            📄 பதிவிறக்கம் (Question PDF)
                           </button>
 
                           {/* Answer Upload Option */}
@@ -265,9 +298,9 @@ function RrbQuiz() {
                           </div>
 
                           {/* Answer Key Download Link */}
-                          {uploadedAnswers[pdf.id] && (
+                          {(uploadedAnswers[pdf.id] || pdf.answerPdfLink) && (
                             <button 
-                              onClick={() => handleOpenPdf(pdf.answerPdfLink, `${pdf.title} - Answer Key`)}
+                              onClick={() => handleOpenPdf(pdf, 'answer')}
                               style={{ 
                                 background: 'none', 
                                 border: 'none', 
