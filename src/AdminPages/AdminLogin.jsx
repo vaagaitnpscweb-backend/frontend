@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // 👈 useState இம்போர்ட் சரிசெய்யப்பட்டது
+import { useState } from 'react'; // 👈 useState இம்போர்ட் சரிசெய்யப்பட்டது
 import { useNavigate } from 'react-router-dom';
 import '../Styles/AdminLogin.css'; // 👈 CSS இம்போர்ட் 
 import logoImg from '../assets/logoImg.jpeg'; // 👈 வாகை லோகோ இம்போர்ட்
