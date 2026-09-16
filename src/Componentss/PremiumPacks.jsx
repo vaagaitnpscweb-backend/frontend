@@ -1,197 +1,312 @@
 import { useState } from 'react';
-import '../Styles/Premium.css'; 
+import '../Styles/Premium.css';
 
 // 🚀 Render Live Backend Base URL
 const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 
 function PremiumPacks() {
-  const books = [
-    { id: 1, title: "📘 TNPSC குரூப் 4 - பொதுத்தமிழ் களஞ்சியம்", author: "வாகை குழுவினர்", price: 299, image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80" },
-    { id: 2, title: "📙 கணிதம் ஆப்டிடியூட் & ரீசனிங் (Shortcuts)", author: "ஆனந்த் மாஸ்டர்", price: 349, image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" },
-    { id: 3, title: "📗 RRB & SI - பொது அறிவியல் கையேடு", author: "வாகை எக்ஸ்பர்ட்ஸ்", price: 399, image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=400&q=80" }
+  // 🏆 பிரீமியம் திட்டங்கள்
+  const plans = [
+    {
+      id: 'sub_silver_399',
+      type: 'subscription',
+      name: '🥈 Silver Pack',
+      price: 399,
+      duration: '3 Months (3 மாதங்கள்)',
+      features: [
+        '✅ 3 மாதங்கள் முழு வேலிடிட்டி',
+        '✅ அனைத்து ஆன்லைன் தேர்வுகளும் 100% இலவசம்',
+        '✅ அனைத்து தேர்வு PDF மெட்டீரியல்களும் 100% இலவசம்',
+        '✅ உடனடி தேர்வு முடிவுகள் & விடைக்குறிப்புகள்'
+      ],
+      badgeClass: 'silver-card',
+      btnClass: 'silver-btn'
+    },
+    {
+      id: 'sub_gold_699',
+      type: 'subscription',
+      name: '🥇 Gold Pack',
+      price: 699,
+      duration: '6 Months (6 மாதங்கள்)',
+      features: [
+        '✅ 6 மாதங்கள் முழு வேலிடிட்டி',
+        '✅ அனைத்து ஆன்லைன் மாதிரி தேர்வுகள் இலவச அக்சஸ்',
+        '✅ பிரீமியம் தேர்வு PDF மெட்டீரியல்கள் இலவசம்',
+        '✅ வினா வங்கி (Question Bank) முழு இலவச பயன்பாடு'
+      ],
+      badgeClass: 'gold-card active-plan',
+      btnClass: 'gold-btn',
+      isPopular: true
+    },
+    {
+      id: 'sub_platinum_1199',
+      type: 'subscription',
+      name: '💎 Platinum Pack',
+      price: 1199,
+      duration: '1 Year (1 வருடம்)',
+      features: [
+        '✅ 1 வருடம் (12 மாதங்கள்) முழு அன்லிமிடெட் அக்சஸ்',
+        '✅ தளத்தில் உள்ள அத்தனை ஆன்லைன் தேர்வுகளும் இலவசம்',
+        '✅ அனைத்து TNPSC, RRB, SI PDF மெட்டீரியல்களும் இலவசம்',
+        '✅ தினசரி நடப்பு நிகழ்வுகள் & புதிய தேர்வுகள் உடனடி அக்சஸ்'
+      ],
+      badgeClass: 'platinum-card',
+      btnClass: 'platinum-btn'
+    }
   ];
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [orderFlow, setOrderFlow] = useState(null); 
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [orderFlow, setOrderFlow] = useState(null);
   const [generatedOrderNo, setGeneratedOrderNo] = useState('');
-  
-  // 🏠 முகவரிக்கு ஆரம்பத்திலேயே காலி ஸ்ட்ரிங் செட் பண்ணிடுவோம்
-  const [shippingAddress, setShippingAddress] = useState({ name: '', phone: '', address: '', pincode: '' });
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const filteredBooks = books.filter(book => 
-    book.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // லாகின் செய்துள்ள பயனரின் விவரங்களை எடுத்தல்
+  const savedUser = localStorage.getItem('user');
+  const currentUser = savedUser ? JSON.parse(savedUser) : null;
 
-  const handleInitiateBuy = (book) => {
-    setSelectedBook(book);
+  // 🏠 தொடர்பு விவரங்கள்
+  const [customerDetails, setCustomerDetails] = useState({
+    name: currentUser?.name || '',
+    phone: currentUser?.contact || '',
+    email: currentUser?.email || ''
+  });
+
+  const handleInitiateBuy = (item) => {
+    setSelectedItem(item);
+    setErrorMessage('');
     setOrderFlow('checkout');
   };
 
-  const handleConfirmPayment = () => {
-    if (!selectedBook) return;
-    
+  // 💳 Razorpay பேமெண்ட் மற்றும் சந்தா ஆர்டர் உருவாக்கும் செயல்முறை
+  const handleConfirmPayment = async () => {
+    if (!selectedItem) return;
+
+    if (!customerDetails.name.trim() || !customerDetails.phone.trim()) {
+      setErrorMessage("தயவுசெய்து உங்கள் பெயர் மற்றும் மொபைல் எண்ணை உள்ளிடவும்!");
+      return;
+    }
+
     setOrderFlow('processing');
-    const randomNo = `VG-${Math.floor(100000 + Math.random() * 900000)}`;
-    setGeneratedOrderNo(randomNo);
+    setErrorMessage('');
 
-    const orderData = {
-      email: shippingAddress.phone ? `${shippingAddress.phone}@vaagaituition.com` : "student@vaagaituition.com",
-      bookId: selectedBook.id.toString(),
-      bookTitle: selectedBook.title,
-      price: selectedBook.price,
-      orderNo: randomNo,
-      shippingAddress: shippingAddress
-    };
+    const userEmail = customerDetails.email
+      ? customerDetails.email.trim().toLowerCase()
+      : currentUser?.email
+      ? currentUser.email.trim().toLowerCase()
+      : `${customerDetails.phone}@vaagaituition.com`;
 
-    // 🚀 Render Live Endpoint-க்கு மாற்றப்பட்டுள்ளது
-    fetch(`${API_BASE}/api/payment/success`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.success) {
-        setOrderFlow('success_slip');
-      } else {
-        alert("ஆர்டர் செய்வதில் சிக்கல்: " + (data?.message || "தெரியாத பிழை"));
+    try {
+      // 1. Backend-ல் Razorpay Order உருவாக்க கோரிக்கை அனுப்புதல்
+      const orderRes = await fetch(`${API_BASE}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: Number(selectedItem.price) })
+      });
+      const orderData = await orderRes.json();
+
+      if (!orderData.success || !orderData.orderId) {
+        setErrorMessage('❌ கட்டணம் உருவாக்குவதில் சிக்கல். Server இணைப்பைச் சரிபார்க்கவும்!');
         setOrderFlow('checkout');
+        return;
       }
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      // நெட்வொர்க் எர்ரர் வந்தாலும் UI லோக்கலாக வேலை செய்ய பேக்கப்
-      setTimeout(() => { setOrderFlow('success_slip'); }, 1500);
-    });
+
+      const randomNo = `VG-${Math.floor(100000 + Math.random() * 900000)}`;
+      setGeneratedOrderNo(randomNo);
+
+      // 2. Razorpay Checkout Options
+      const options = {
+        key: "rzp_live_TXSfHBesNhHuXM",
+        amount: orderData.amount,
+        currency: "INR",
+        name: "Vaagai Tuition",
+        description: `Purchase: ${selectedItem.name}`,
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          // 3. பேமெண்ட் வெற்றிகரமாக முடிந்ததும் Backend-ல் ஆர்டரைச் சேமித்தல்
+          const payload = {
+            email: userEmail,
+            bookId: selectedItem.id.toString(),
+            bookTitle: selectedItem.name,
+            price: selectedItem.price,
+            orderNo: randomNo,
+            razorpay_order_id: orderData.orderId,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            shippingAddress: {
+              name: customerDetails.name,
+              phone: customerDetails.phone,
+              address: 'Digital Subscription (All Tests & PDFs Free)',
+              pincode: 'Digital'
+            }
+          };
+
+          const saveRes = await fetch(`${API_BASE}/api/payment/success`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const saveData = await saveRes.json();
+          if (saveData && saveData.success) {
+            setOrderFlow('success_slip');
+          } else {
+            setErrorMessage('ஆர்டர் சேமிப்பதில் சிக்கல்: ' + (saveData?.message || 'தெரியாத பிழை'));
+            setOrderFlow('checkout');
+          }
+        },
+        prefill: {
+          name: customerDetails.name,
+          email: userEmail,
+          contact: customerDetails.phone
+        },
+        theme: { color: "#0f766e" }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (error) {
+      console.error('Payment Error:', error);
+      setErrorMessage('கட்டணம் செலுத்துவதில் நெட்வொர்க் பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்!');
+      setOrderFlow('checkout');
+    }
+  };
+
+  const isCheckoutValid = () => {
+    return Boolean(customerDetails.name?.trim() && customerDetails.phone?.trim());
   };
 
   return (
     <div className="premium-page-container">
-      
-      {/* 1. பிளான்கள் செக்ஷன் */}
+      {/* 1. பிரீமியம் திட்டங்கள் மட்டும் */}
       <div className="premium-header">
-        <h2>🏆 வாகை ஆன்லைன் பிளான்கள்</h2>
-        <p>உங்கள் அரசு வேலை கனவை நனவாக்குங்கள். அத்துடன் நண்பர்களைப் பரிந்துரைத்து கமிஷன் பெரும் வாய்ப்பைப் பெறுங்கள்!</p>
+        <h2>🏆 வாகை பிரீமியம் திட்டங்கள்</h2>
+        <p>
+          திட்டத்தில் இணைந்து இணையதளத்தில் உள்ள <b>அனைத்து ஆன்லைன் தேர்வுகள்</b> மற்றும் <b>PDF மெட்டீரியல்களை இலவசமாகப்</b> பெறுங்கள்!
+        </p>
       </div>
 
       <div className="pricing-plans-container">
-        <div className="pricing-card silver-card">
-          <div className="plan-name">🥈 Silver Pack</div>
-          <div className="plan-price">₹399</div>
-          <ul className="plan-features">
-            <li>✅ TNPSC & PC மாதிரி வினாத்தாள்கள்</li>
-            <li className="commission-feature">💰 10% Affiliate கமிஷன்</li>
-          </ul>
-          <button className="buy-plan-btn silver-btn">இப்போதே வாங்கு</button>
-        </div>
-
-        <div className="pricing-card gold-card active-plan">
-          <div className="best-value-badge">★ BEST VALUE</div>
-          <div className="plan-name">🥇 Gold Pack</div>
-          <div className="plan-price">₹699</div>
-          <ul className="plan-features">
-            <li>✅ அனைத்து தேர்வுகள் அக்சஸ்</li>
-            <li className="commission-feature">💰 15% Affiliate கமிஷன்</li>
-          </ul>
-          <button className="buy-plan-btn gold-btn">இப்போதே வாங்கு</button>
-        </div>
-
-        <div className="pricing-card platinum-card">
-          <div className="plan-name">💎 Platinum Pack</div>
-          <div className="plan-price">₹1199</div>
-          <ul className="plan-features">
-            <li>✅ 1 வருடம் அன்லிமிடெட் அக்சஸ்</li>
-            <li className="commission-feature">💰 25% Mega கமிஷன் பிளான்</li>
-          </ul>
-          <button className="buy-plan-btn platinum-btn">இப்போதே வாங்கு</button>
-        </div>
-      </div>
-
-      <hr className="section-divider" />
-
-      {/* 2. புக் ஸ்டோர் செக்ஷன் */}
-      <div className="book-store-section">
-        <div className="premium-header">
-          <h2>📚 வாகை புக் ஸ்டோர் (Materials & Books)</h2>
-        </div>
-
-        <div className="store-search-container">
-          <input 
-            type="text" 
-            placeholder="தேவையான புத்தகங்களைத் தேடுங்கள்..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="store-search-input"
-          />
-        </div>
-
-        <div className="books-grid">
-          {filteredBooks.map(book => (
-            <div key={book.id} className="book-card">
-              <img src={book.image} alt={book.title} className="book-img" />
-              <div className="book-info">
-                <h4>{book.title}</h4>
-                <p>ஆசிரியர்: {book.author}</p>
-                <div className="book-price-row">
-                  <span className="b-price">₹{book.price}</span>
-                  <button className="order-now-btn" onClick={() => handleInitiateBuy(book)}>🎯 Buy Now</button>
-                </div>
-              </div>
+        {plans.map((plan) => (
+          <div key={plan.id} className={`pricing-card ${plan.badgeClass}`}>
+            {plan.isPopular && <div className="best-value-badge">★ BEST VALUE</div>}
+            <div className="plan-name">{plan.name}</div>
+            <div className="plan-price">
+              ₹{plan.price}
+              <span style={{ fontSize: '13px', color: '#64748b', display: 'block', marginTop: '4px' }}>
+                {plan.duration}
+              </span>
             </div>
-          ))}
-        </div>
+            <ul className="plan-features">
+              {plan.features.map((feat, idx) => (
+                <li key={idx}>{feat}</li>
+              ))}
+            </ul>
+            <button
+              className={`buy-plan-btn ${plan.btnClass}`}
+              onClick={() => handleInitiateBuy(plan)}
+            >
+              இப்போதே வாங்கு (₹{plan.price})
+            </button>
+          </div>
+        ))}
       </div>
 
-      {/* 🌟 3. பாப்-அப் மாடல் */}
+      {/* 3. ஆர்டர் பாப்-அப் மாடல் */}
       {orderFlow && (
         <div className="order-modal-overlay">
           <div className="order-modal-box">
-            
             {orderFlow === 'checkout' && (
               <div>
-                <span className="close-slip-btn" onClick={() => setOrderFlow(null)}>✕</span>
-                <h3>🛒 Shipping Details</h3>
-                <div className="address-form-container">
-                  <input type="text" placeholder="உங்கள் பெயர்" value={shippingAddress?.name || ''} onChange={(e) => setShippingAddress({...shippingAddress, name: e.target.value})} className="address-input" />
-                  <input type="tel" placeholder="மொபைல் எண்" value={shippingAddress?.phone || ''} onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})} className="address-input" />
-                  <textarea placeholder="முழு முகவரி" value={shippingAddress?.address || ''} onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})} className="address-textarea"></textarea>
-                  <input type="text" placeholder="பின்கோடு" value={shippingAddress?.pincode || ''} onChange={(e) => setShippingAddress({...shippingAddress, pincode: e.target.value})} className="address-input" />
+                <span className="close-slip-btn" onClick={() => setOrderFlow(null)}>
+                  ✕
+                </span>
+                <h3>👑 பிரீமியம் சந்தா விவரம்</h3>
+                
+                {errorMessage && (
+                  <div style={{ background: '#ffeeec', color: '#dc2626', padding: '8px 12px', borderRadius: '4px', fontSize: '13px', margin: '8px 0' }}>
+                    {errorMessage}
+                  </div>
+                )}
+
+                <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '6px', margin: '12px 0' }}>
+                  <p style={{ margin: 0, fontWeight: 'bold', color: '#0f766e' }}>
+                    {selectedItem?.name}
+                  </p>
+                  <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#16a34a', fontWeight: 'bold' }}>
+                    கட்டணம்: ₹{selectedItem?.price}
+                  </p>
                 </div>
-                <button 
-                  className="place-order-confirm-btn" 
-                  disabled={!shippingAddress?.name || !shippingAddress?.phone || !shippingAddress?.address || !shippingAddress?.pincode} 
+
+                <div className="address-form-container">
+                  <input
+                    type="text"
+                    placeholder="உங்கள் பெயர் *"
+                    value={customerDetails.name}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, name: e.target.value })}
+                    className="address-input"
+                    required
+                  />
+                  <input
+                    type="tel"
+                    placeholder="மொபைல் எண் (WhatsApp எண்) *"
+                    value={customerDetails.phone}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, phone: e.target.value })}
+                    className="address-input"
+                    required
+                  />
+                  <input
+                    type="email"
+                    placeholder="மின்னஞ்சல் (Email) *"
+                    value={customerDetails.email}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, email: e.target.value })}
+                    className="address-input"
+                    required
+                  />
+                </div>
+
+                <button
+                  className="place-order-confirm-btn"
+                  disabled={!isCheckoutValid()}
                   onClick={handleConfirmPayment}
                 >
-                  💳 Place Order & Pay
+                  💳 Razorpay மூலம் கட்டணம் செலுத்துக (₹{selectedItem?.price})
                 </button>
               </div>
             )}
 
             {orderFlow === 'processing' && (
-              <div style={{ textAlign: 'center' }}>
+              <div style={{ textAlign: 'center', padding: '24px 10px' }}>
                 <div className="spinner"></div>
-                <h3>🔄 ஆர்டர் செயலாக்கப்படுகிறது...</h3>
+                <h3>🔄 கட்டணம் செயலாக்கப்படுகிறது...</h3>
+                <p style={{ color: '#64748b', fontSize: '13px' }}>தயவுசெய்து காத்திருக்கவும்.</p>
               </div>
             )}
 
             {orderFlow === 'success_slip' && (
               <div>
-                <span className="close-slip-btn" onClick={() => setOrderFlow(null)}>✕</span>
-                <h3 style={{ color: '#059669' }}>🎉 Order Placed!</h3>
+                <span className="close-slip-btn" onClick={() => setOrderFlow(null)}>
+                  ✕
+                </span>
+                <h3 style={{ color: '#059669' }}>🎉 ஆர்டர் வெற்றிகரமாக முடிந்தது!</h3>
                 <div className="invoice-slip">
-                  <p><b>புத்தகம்:</b> {selectedBook?.title || 'Book'}</p>
-                  <p><b>தொகை:</b> ₹{selectedBook?.price || '0'}</p>
+                  <p><b>திட்டம்:</b> {selectedItem?.name}</p>
+                  <p><b>செலுத்திய தொகை:</b> ₹{selectedItem?.price}</p>
                   <p><b>ஆர்டர் எண்:</b> {generatedOrderNo}</p>
+                  <p><b>மாணவர் பெயர்:</b> {customerDetails.name}</p>
+                  
+                  <div style={{ marginTop: '10px', padding: '8px', background: '#ecfdf5', borderRadius: '4px', color: '#065f46', fontSize: '13px' }}>
+                    🌟 உங்கள் பிரீமியம் திட்டம் ஆக்டிவேட் செய்யப்பட்டது. ஆன்லைன் தேர்வுகள் மற்றும் PDF மெட்டீரியல்களை இப்போது இலவசமாகப் பயன்படுத்தலாம்!
+                  </div>
                 </div>
-                <button className="download-slip-btn" onClick={() => setOrderFlow(null)}>சரி</button>
+                <button className="download-slip-btn" onClick={() => setOrderFlow(null)}>
+                  சரி (Done)
+                </button>
               </div>
             )}
-
           </div>
         </div>
       )}
-
     </div>
   );
 }
