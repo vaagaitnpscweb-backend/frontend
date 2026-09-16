@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// 🚀 Render Live Backend Base URL
 const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 
 function PcQuiz() {
@@ -8,7 +9,6 @@ function PcQuiz() {
   const [loading, setLoading] = useState(true);
   const [purchasedPdfIds, setPurchasedPdfIds] = useState([]);
   const [uploadedAnswers, setUploadedAnswers] = useState({});
-  const [activeTab, setActiveTab] = useState('free');
   const navigate = useNavigate();
 
   const savedUser = localStorage.getItem('user');
@@ -18,7 +18,7 @@ function PcQuiz() {
     fetch(`${API_BASE}/api/paid-pdfs/client/PC`)
       .then(res => res.json())
       .then(data => { 
-        if (data.success) setPdfList(data.pdfs || []); 
+        if (data.success) setPdfList(data.pdfs); 
       })
       .catch(err => console.error("Error fetching PDFs:", err));
 
@@ -38,21 +38,58 @@ function PcQuiz() {
     }
   }, []);
 
-  const handleOpenPdf = (pdfBase64OrUrl, title) => {
-    if (!pdfBase64OrUrl) {
+  // 📄 PDF-ஐ புதிய விண்டோவில் திறக்கும் ஃபங்ஷன் (சப்ஸ்கிரிப்ஷன் மற்றும் பேமெண்ட் அக்சஸ் சரிபார்ப்புடன்)
+  const handleOpenPdf = async (pdf, type = 'question') => {
+    const driveUrl = type === 'question' ? pdf.questionPdfLink : pdf.answerPdfLink;
+    const title = type === 'question' ? pdf.title : `${pdf.title} - Answer Key`;
+
+    if (!driveUrl) {
       alert("❌ PDF file is not available!");
       return;
     }
+
+    // 1. PDF முற்றிலும் இலவசம் எனில் நேரடியாகத் திறக்கலாம்
+    if (pdf.isFree) {
+      openDrivePreview(driveUrl, title);
+      return;
+    }
+
+    if (!user) {
+      alert("🔐 Please log in first to access this material!");
+      return;
+    }
+
     try {
-      if (pdfBase64OrUrl.startsWith('data:application/pdf')) {
-        const pdfWindow = window.open("");
-        pdfWindow.document.write(
-          `<iframe width='100%' height='100%' src='${pdfBase64OrUrl}' style='border:none;'></iframe>`
-        );
-        pdfWindow.document.title = title || "Vaagai Tuition Material";
+      // 2. சப்ஸ்கிரிப்ஷன் வைத்துள்ளாரா அல்லது ஏற்கனவே பணம் செலுத்தியுள்ளாரா என சரிபார்க்கவும்
+      const res = await fetch(`${API_BASE}/api/user/check-access?email=${user.email}&pdfId=${pdf.id || pdf._id}`);
+      const data = await res.json();
+
+      if (data.success && data.hasAccess) {
+        // 🟢 சப்ஸ்கிரிப்ஷன் அல்லது பேமெண்ட் செய்துள்ளார் -> டவுன்லோட் அனுமதிக்கப்படும்
+        openDrivePreview(driveUrl, title);
       } else {
-        window.open(pdfBase64OrUrl, '_blank');
+        // 🔴 கட்டணம் செலுத்த வேண்டும்
+        const confirmBuy = window.confirm(`இந்த PDF-ன் விலை ₹${pdf.price || 5}. வாகை பிரீமியம் திட்டம் அல்லது தனிப்பட்ட கட்டணம் செலுத்திப் பெற விரும்புகிறீர்களா?`);
+        if (confirmBuy) {
+          navigate('/premium');
+        }
       }
+    } catch (err) {
+      console.error("Access check error:", err);
+      alert("அக்சஸ் சரிபார்ப்பில் பிழை ஏற்பட்டது.");
+    }
+  };
+
+  const openDrivePreview = (driveUrl, title) => {
+    try {
+      let finalUrl = driveUrl.trim();
+      if (finalUrl.includes('drive.google.com')) {
+        const match = finalUrl.match(/\/d\/(.+?)\/(view|preview)?/) || finalUrl.match(/id=(.+?)(&|$)/);
+        if (match && match[1]) {
+          finalUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+        }
+      }
+      window.open(finalUrl, '_blank');
     } catch (err) {
       alert("⚠️ Unable to open PDF. Please allow popups in your browser.");
     }
@@ -60,7 +97,7 @@ function PcQuiz() {
 
   const handlePayment = async (pdfId, title, price) => {
     if (!user) {
-      alert("🔐 Please log in first to attempt the test!");
+      alert("🔐 Please log in first to attempt the mock test!");
       return;
     }
 
@@ -76,17 +113,36 @@ function PcQuiz() {
       const orderData = await res.json();
 
       if (!orderData.success || !orderData.orderId) {
-        alert("❌ Unable to create payment order!");
+        alert("❌ Unable to create payment order. Please check server connection!");
         return;
       }
 
       const options = {
-        key: "rzp_live_TXSfHBesNhHuXM",
+        key: "rzp_test_TCtg24wJm0gqRH",
         amount: orderData.amount,
         currency: "INR",
         name: "Vaagai Tuition",
         description: `Purchase: ${title}`,
         order_id: orderData.orderId,
+        
+        config: {
+          display: {
+            blocks: {
+              custom_block: {
+                name: "Pay via UPI or Card",
+                instruments: [
+                  { method: "upi" },
+                  { method: "card" }
+                ]
+              }
+            },
+            sequence: ["block.custom_block"],
+            preferences: {
+              show_default_blocks: false
+            }
+          }
+        },
+
         handler: async function (response) {
           const saveRes = await fetch(`${API_BASE}/api/payment/success`, {
             method: 'POST',
@@ -112,119 +168,162 @@ function PcQuiz() {
           email: user.email || "",
           contact: user.contact || "9999999999"
         },
-        theme: { color: "#d97706" }
+        theme: { color: "#16a34a" }
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
 
     } catch (err) {
-      alert("Payment failed due to a network error.");
+      console.error("Payment Error:", err);
+      alert("Payment failed due to a network error. Please try again!");
     }
   };
 
   const handleAnswerUpload = (e, pdfId) => {
     if (e.target.files[0]) {
-      alert(`✅ Answer sheet uploaded successfully!`);
+      alert(`✅ Answer sheet uploaded successfully! The answer key is now unlocked.`);
       setUploadedAnswers(prev => ({ ...prev, [pdfId]: true }));
     }
   };
 
-  const freePdfs = pdfList.filter(pdf => pdf.isFree === true || pdf.isFree === 'true' || Number(pdf.price) === 0);
-  const paidPdfs = pdfList.filter(pdf => !(pdf.isFree === true || pdf.isFree === 'true' || Number(pdf.price) === 0));
-  const currentDisplayList = activeTab === 'free' ? freePdfs : paidPdfs;
-
-  if (loading) return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>🔄 Loading PC Tests...</div>;
+  if (loading) return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>🔄 Loading Police Constable Tests...</div>;
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '30px auto', padding: '20px', fontFamily: "'Segoe UI', sans-serif" }}>
-      <div style={{ background: '#d97706', color: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', marginBottom: '20px' }}>
-        <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>🛡️ PC இரண்டாம் நிலை காவலர் தேர்வுப் பெட்டகம்</h1>
-        <p style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>காவலர் தேர்வுகளுக்கான மாதிரித் தேர்வுகள்</p>
+    <div style={{ maxWidth: '1000px', margin: '30px auto', padding: '20px', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
+      
+      {/* 👮 Header */}
+      <div style={{ background: '#002b49', color: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center', marginBottom: '25px' }}>
+        <h1 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>👮 PC (Police Constable) Exam Portal</h1>
+        <p style={{ margin: '0', opacity: 0.9, fontSize: '14px' }}>Mock Tests & Study Materials for Police Constable Exams (சப்ஸ்கிரிப்ஷன் வைத்துள்ள மாணவர்களுக்கு அனைத்து PDF-களும் முற்றிலும் இலவசம்!)</p>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '25px' }}>
-        <button
-          onClick={() => setActiveTab('free')}
-          style={{
-            padding: '12px 24px', borderRadius: '30px', border: '2px solid #16a34a',
-            background: activeTab === 'free' ? '#16a34a' : '#ffffff',
-            color: activeTab === 'free' ? '#ffffff' : '#16a34a',
-            fontWeight: 'bold', fontSize: '15px', cursor: 'pointer'
-          }}
-        >
-          🎉 இலவச மாதிரித் தேர்வுகள் ({freePdfs.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab('paid')}
-          style={{
-            padding: '12px 24px', borderRadius: '30px', border: '2px solid #d97706',
-            background: activeTab === 'paid' ? '#d97706' : '#ffffff',
-            color: activeTab === 'paid' ? '#ffffff' : '#d97706',
-            fontWeight: 'bold', fontSize: '15px', cursor: 'pointer'
-          }}
-        >
-          💳 கட்டணத் தேர்வுகள் / Paid Tests ({paidPdfs.length})
-        </button>
-      </div>
-
-      {currentDisplayList.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', color: '#64748b' }}>
-          👋 {activeTab === 'free' ? 'இலவசத் தேர்வுகள் எதுவும் இல்லை.' : 'கட்டணத் தேர்வுகள் எதுவும் இல்லை.'}
+      {pdfList.length === 0 ? (
+        <div style={{ padding: '40px', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', color: '#64748b' }}>
+          👋 No Police Constable materials are currently live. Please check back later!
         </div>
       ) : (
         <div style={{ overflowX: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', borderRadius: '8px' }}>
+          
+          {/* 📊 TABLE LAYOUT */}
           <table style={{ width: '100%', borderCollapse: 'collapse', background: '#ffffff', textAlign: 'left' }}>
             <thead>
-              <tr style={{ background: '#d97706', color: '#ffffff' }}>
-                <th style={{ padding: '14px', border: '1px solid #b45309', textAlign: 'center' }}>வரிசை எண்</th>
-                <th style={{ padding: '14px 20px', border: '1px solid #b45309' }}>பொருள் விவரங்கள் (Material Title)</th>
-                <th style={{ padding: '14px', border: '1px solid #b45309', textAlign: 'center' }}>வகை (Price)</th>
-                <th style={{ padding: '14px 20px', border: '1px solid #b45309', textAlign: 'center' }}>PDF இணைப்பு (Action)</th>
+              <tr style={{ background: '#002b49', color: '#ffffff' }}>
+                <th style={{ padding: '14px 16px', border: '1px solid #00385f', width: '80px', textAlign: 'center', fontSize: '15px' }}>வரிசை எண்</th>
+                <th style={{ padding: '14px 20px', border: '1px solid #00385f', fontSize: '15px' }}>பொருள் விவரங்கள் (Material Title)</th>
+                <th style={{ padding: '14px 16px', border: '1px solid #00385f', width: '130px', textAlign: 'center', fontSize: '15px' }}>வகை (Price)</th>
+                <th style={{ padding: '14px 20px', border: '1px solid #00385f', width: '280px', textAlign: 'center', fontSize: '15px' }}>PDF இணைப்பு (Action)</th>
               </tr>
             </thead>
             <tbody>
-              {currentDisplayList.map((pdf, index) => {
+              {pdfList.map((pdf, index) => {
                 const isFree = pdf.isFree === true || pdf.isFree === 'true' || Number(pdf.price) === 0;
                 const isPurchased = isFree || purchasedPdfIds.includes(Number(pdf.id));
 
                 return (
-                  <tr key={pdf.id} style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
-                    <td style={{ padding: '14px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 'bold' }}>{index + 1}</td>
-                    <td style={{ padding: '14px 20px', border: '1px solid #e2e8f0', fontWeight: '600' }}>{pdf.title}</td>
+                  <tr key={pdf.id || pdf._id} style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                    
+                    {/* 1. S.No */}
+                    <td style={{ padding: '14px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 'bold', color: '#334155' }}>
+                      {index + 1}
+                    </td>
+
+                    {/* 2. Material Title */}
+                    <td style={{ padding: '14px 20px', border: '1px solid #e2e8f0', color: '#1e293b', fontWeight: '600', fontSize: '15px' }}>
+                      {pdf.title}
+                    </td>
+
+                    {/* 3. Access Type / Price Badge */}
                     <td style={{ padding: '14px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                      <span style={{ background: isFree ? '#dcfce7' : '#fef9c3', color: isFree ? '#15803d' : '#854d0e', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>
+                      <span style={{ 
+                        background: isFree ? '#dcfce7' : '#fef9c3', 
+                        color: isFree ? '#15803d' : '#854d0e', 
+                        padding: '4px 10px', 
+                        borderRadius: '20px', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold',
+                        display: 'inline-block'
+                      }}>
                         {isFree ? '🎉 FREE' : `₹ ${pdf.price || 5}`}
                       </span>
                     </td>
+
+                    {/* 4. Action Button */}
                     <td style={{ padding: '14px 20px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                       {!isPurchased ? (
-                        <button onClick={() => handlePayment(pdf.id, pdf.title, pdf.price || 5)} style={{ background: '#22c55e', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        <button 
+                          onClick={() => handlePayment(pdf.id, pdf.title, pdf.price || 5)} 
+                          style={{ 
+                            background: '#22c55e', 
+                            color: '#ffffff', 
+                            padding: '8px 16px', 
+                            border: 'none', 
+                            borderRadius: '6px', 
+                            cursor: 'pointer', 
+                            fontWeight: 'bold', 
+                            fontSize: '13px',
+                            boxShadow: '0 2px 4px rgba(34, 197, 94, 0.2)',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
                           💳 Pay ₹{pdf.price || 5} to Unlock
                         </button>
                       ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                          <button onClick={() => handleOpenPdf(pdf.questionPdfLink, pdf.title)} style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}>
-                            பதிவிறக்கம் (Question PDF)
+                          
+                          {/* Download Link */}
+                          <button 
+                            onClick={() => handleOpenPdf(pdf, 'question')}
+                            style={{ 
+                              background: 'none', 
+                              border: 'none', 
+                              color: '#2563eb', 
+                              fontWeight: 'bold', 
+                              cursor: 'pointer', 
+                              fontSize: '14px',
+                              textDecoration: 'underline' 
+                            }}
+                          >
+                            📄 பதிவிறக்கம் (Question PDF)
                           </button>
+
+                          {/* Answer Upload Option */}
                           <div style={{ fontSize: '11px', color: '#64748b' }}>
-                            <label style={{ display: 'block' }}>Upload Answer Sheet:</label>
-                            <input type="file" onChange={(e) => handleAnswerUpload(e, pdf.id)} style={{ fontSize: '11px', width: '170px' }} />
+                            <label style={{ display: 'block', marginBottom: '2px' }}>Upload OMR/Answer:</label>
+                            <input 
+                              type="file" 
+                              onChange={(e) => handleAnswerUpload(e, pdf.id)} 
+                              style={{ fontSize: '11px', width: '170px' }} 
+                            />
                           </div>
-                          {uploadedAnswers[pdf.id] && (
-                            <button onClick={() => handleOpenPdf(pdf.answerPdfLink, `${pdf.title} - Answer Key`)} style={{ background: 'none', border: 'none', color: '#16a34a', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}>
+
+                          {/* Answer Key Download Link */}
+                          {(uploadedAnswers[pdf.id] || pdf.answerPdfLink) && (
+                            <button 
+                              onClick={() => handleOpenPdf(pdf, 'answer')}
+                              style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                color: '#16a34a', 
+                                fontWeight: 'bold', 
+                                cursor: 'pointer', 
+                                fontSize: '13px',
+                                textDecoration: 'underline' 
+                              }}
+                            >
                               🔑 Answer Key PDF
                             </button>
                           )}
                         </div>
                       )}
                     </td>
+
                   </tr>
                 );
               })}
             </tbody>
           </table>
+
         </div>
       )}
     </div>
