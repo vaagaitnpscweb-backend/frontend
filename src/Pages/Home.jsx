@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import '../Styles/Home.css';
 import logoImg from '../assets/logoImg.jpeg';
 
-// 🚀 Render Live Backend Base URL
 const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 
 function Home() {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 📸 ஸ்லைடர் இமேஜஸ் (Fallback Default Data)
   const [slides, setSlides] = useState([
     {
       id: 1,
@@ -32,20 +30,23 @@ function Home() {
     }
   ]);
 
-  // Notifications & Materials States
   const [notifications, setNotifications] = useState([
-    { id: 1, text: "🔥 TNPSC Group 4 & Model Tests Announced!", link: "/free-quiz" },
-    { id: 2, text: "🆕 Mixed Subject Online Mock Tests Live!", link: "/free-quiz" },
-    { id: 3, text: "📢 Daily Current Affairs & Tamil Practice Started!", link: "/free-quiz" }
+    { id: 1, title: "TNPSC Group 4 & Model Tests Announced!", description: "Model tests are live now.", pdfLink: "", targetUrl: "/mocktest" },
+    { id: 2, title: "Mixed Subject Online Mock Tests Live!", description: "Practice daily tests.", pdfLink: "", targetUrl: "/mocktest" }
   ]);
 
   const [studyMaterials, setStudyMaterials] = useState([
     { id: 1, text: "📕 Tamil Grammar Notes & Model Question Sets [Vaagai Special]", link: "/premium" },
-    { id: 2, text: "📘 General Knowledge - Important Articles & Science", link: "/free-quiz" },
-    { id: 3, text: "📙 Aptitude & Mental Ability - Shortcut Methods", link: "/free-quiz" }
+    { id: 2, text: "📘 General Knowledge - Important Articles & Science", link: "/mocktest" },
+    { id: 3, text: "📙 Aptitude & Mental Ability - Shortcut Methods", link: "/mocktest" }
   ]);
 
-  // 🌐 Fetch Live Slides from Backend (Safe Filter Applied)
+  // Master Admin Live App Notifications State for Scrolling Ticker
+  const [masterNotifications, setMasterNotifications] = useState([
+    "📢 Welcome to Vaagai Tuition Center! New CBT Mock Exams are live now.",
+    "🚀 Attend daily tests and boost your exam preparation points!"
+  ]);
+
   useEffect(() => {
     fetch(`${API_BASE}/api/home/slides`)
       .then(res => res.json())
@@ -57,10 +58,32 @@ function Home() {
           }
         }
       })
-      .catch(err => console.log("Using default fallback slides."));
+      .catch(() => console.log("Using default fallback slides."));
   }, []);
 
-  // Auto Slide Timer (4 Seconds)
+  useEffect(() => {
+    fetch(`${API_BASE}/api/notifications/public`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && data.notifications.length > 0) {
+          setNotifications(data.notifications);
+        }
+      })
+      .catch(() => console.log("Using default fallback notifications."));
+  }, []);
+
+  // Fetch Master Admin App Notifications for bottom ticker
+  useEffect(() => {
+    fetch(`${API_BASE}/api/admin/app-notifications`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && Array.isArray(data.notifications) && data.notifications.length > 0) {
+          setMasterNotifications(data.notifications.map(n => n.message || n.text || n));
+        }
+      })
+      .catch(() => console.log("Using default fallback master ticker."));
+  }, []);
+
   useEffect(() => {
     if (slides.length === 0) return;
     const timer = setInterval(() => {
@@ -70,11 +93,23 @@ function Home() {
   }, [slides.length]);
 
   const examCategories = [
-    { id: 'tamil', title: '📖 பொதுத் தமிழ் (Tamil)', desc: 'இலக்கியம், இலக்கணம் மற்றும் உரைநடை சார்ந்த முக்கிய வினா வங்கி.', link: '/free-quiz', color: '#1e3a8a' },
-    { id: 'maths', title: '🧮 கணிதம் (Maths & Aptitude)', desc: 'வேகமாக கணக்கிடும் குறுக்கு வழிகளுடன் கூடிய பயிற்சித் தேர்வுகள்.', link: '/free-quiz', color: '#0284c7' },
-    { id: 'science', title: '🔬 அறிவியல் (Science)', desc: 'இயற்பியல், வேதியியல் மற்றும் உயிரியல் முக்கிய மாதிரி வினாக்கள்.', link: '/free-quiz', color: '#059669' },
-    { id: 'social', title: '🏛️ சமூக அறிவியல் (Social)', desc: 'வரலாறு, புவியியல் மற்றும் இந்திய அரசியலமைப்பு வினாத்தாள்கள்.', link: '/free-quiz', color: '#dc2626' }
+    { id: 'tamil', title: '📖 பொதுத் தமிழ் (Tamil)', desc: 'இலக்கியம், இலக்கணம் மற்றும் உரைநடை சார்ந்த முக்கிய வினா வங்கி.', link: '/mocktest', color: '#1e3a8a' },
+    { id: 'maths', title: '🧮 கணிதம் (Maths & Aptitude)', desc: 'வேகமாக கணக்கிடும் குறுக்கு வழிகளுடன் கூடிய பயிற்சித் தேர்வுகள்.', link: '/mocktest', color: '#0284c7' },
+    { id: 'science', title: '🔬 அறிவியல் (Science)', desc: 'இயற்பியல், வேதியியல் மற்றும் உயிரியல் முக்கிய மாதிரி வினாக்கள்.', link: '/mocktest', color: '#059669' },
+    { id: 'social', title: '🏛️ சமூக அறிவியல் (Social)', desc: 'வரலாறு, புவியியல் மற்றும் இந்திய அரசியலமைப்பு வினாத்தாள்கள்.', link: '/mocktest', color: '#dc2626' }
   ];
+
+  const handleOpenPdf = (driveUrl) => {
+    if (!driveUrl || driveUrl.trim() === '') return;
+    let finalUrl = driveUrl.trim();
+    if (finalUrl.includes('drive.google.com')) {
+      const match = finalUrl.match(/\/file\/d\/([^/]+)/) || finalUrl.match(/\/d\/([^/]+)/) || finalUrl.match(/[?&]id=([^&]+)/);
+      if (match && match[1]) {
+        finalUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+    }
+    window.open(finalUrl, '_blank');
+  };
 
   return (
     <div className="home-page-container">
@@ -90,7 +125,7 @@ function Home() {
             </div>
           </div>
           <div className="hero-buttons">
-            <button className="hero-btn-primary" onClick={() => navigate('/free-quiz')}>🚀 Start Free Quiz</button>
+            <button className="hero-btn-primary" onClick={() => navigate('/mocktest')}>🚀 Start Mock Test</button>
             <button className="hero-btn-secondary" onClick={() => navigate('/premium')}>💎 Premium Test Packs</button>
           </div>
         </div>
@@ -128,6 +163,7 @@ function Home() {
       {/* 3. UPDATES & STUDY MATERIALS SECTION */}
       <section className="updates-dashboard-section">
         <div className="updates-container">
+          
           <div className="update-box notification-box">
             <div className="box-header notification-header">
               <h3>🔔 Exam Notifications</h3>
@@ -135,8 +171,22 @@ function Home() {
             <div className="box-content">
               <ul>
                 {notifications.map((note) => (
-                  <li key={note.id} onClick={() => navigate(note.link)}>
-                    {note.text} <span className="new-tag">New</span>
+                  <li key={note.id || note._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate(note.targetUrl || '/mocktest')}>
+                    <div>
+                      <b>{note.title}</b>
+                      {note.description && <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 'normal' }}>{note.description}</div>}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      {note.pdfLink && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleOpenPdf(note.pdfLink); }} 
+                          style={{ background: '#e0f2fe', color: '#0369a1', border: 'none', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                          📄 PDF
+                        </button>
+                      )}
+                      <span className="new-tag">New</span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -176,6 +226,20 @@ function Home() {
               <span className="exam-card-link" style={{ color: exam.color }}>Start Practice &rarr;</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* 5. MASTER ADMIN NOTIFICATION TICKER BOX (Bottom Scrolling Ticker) */}
+      <section className="master-notification-ticker-section">
+        <div className="ticker-card">
+          <div className="ticker-badge">📢 Master Alert</div>
+          <div className="ticker-text-wrapper">
+            <div className="ticker-sliding-content">
+              {masterNotifications.map((msg, idx) => (
+                <span key={idx} className="ticker-message-item">⭐ {msg} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
