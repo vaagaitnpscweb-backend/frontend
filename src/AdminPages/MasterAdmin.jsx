@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../Styles/MasterAdmin.css';
+/*import '../Styles/MasterAdmin.css';*/
 import logoImg from '../assets/logoImg.jpeg';
 import { fetchTamilWord } from '../utils/tamilTransliterate';
 
