@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-/*import '../Styles/MasterAdmin.css';*/
+import '../Styles/MasterAdmin.css';
 import logoImg from '../assets/logoImg.jpeg';
 import { fetchTamilWord } from '../utils/tamilTransliterate';
 
@@ -43,8 +43,7 @@ function MasterAdmin() {
 
   // 🎯 Navigation & Dropdowns
   const [activeTab, setActiveTab] = useState(isMasterAdmin ? 'dashboard' : 'questions');
-  const [selectedTopicTab, setSelectedTopicTab] = useState('All');
-
+  const [selectedTopicTab] = useState('All');
   // 🔍 Refund Mobile Search Filter State
   const [refundMobileSearch, setRefundMobileSearch] = useState('');
 
@@ -184,10 +183,10 @@ function MasterAdmin() {
   const [isReportLoading, setIsReportLoading] = useState(false);
 
   // Pagination
-  const [questionPage, setQuestionPage] = useState(1);
-  const [testPage, setTestPage] = useState(1);
-  const [pdfPage, setPdfPage] = useState(1);
-  const [caPage, setCaPage] = useState(1);
+  const [questionPage] = useState(1);
+  const [testPage] = useState(1);
+  const [pdfPage] = useState(1);
+  const [caPage] = useState(1);
   const itemsPerPage = 10;
 
   // Modals & View States
@@ -258,10 +257,10 @@ function MasterAdmin() {
   });
   const [previewTest, setPreviewTest] = useState(null);
 
-  const authHeaders = {
+  const authHeaders = useMemo(() => ({
     'Content-Type': 'application/json',
     'user-email': currentUser.email || 'abcdanand970@gmail.com'
-  };
+  }), [currentUser.email]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -298,7 +297,7 @@ function MasterAdmin() {
     fetch(`${API_BASE}/api/admin/users`, { headers: authHeaders })
       .then((r) => r.json())
       .then((d) => { if (d.success) setUsersList(d.users || []); });
-  }, [currentUser.email]);
+  }, [authHeaders]);
 
   const fetchSubscribers = useCallback(() => {
     setIsDataLoading(true);
@@ -306,7 +305,7 @@ function MasterAdmin() {
       .then((r) => r.json())
       .then((d) => { if (d.success) setSubscribersList(d.subscriptions || []); })
       .finally(() => setIsDataLoading(false));
-  }, [currentUser.email]);
+  }, [authHeaders]);
 
   const fetchOrders = useCallback(() => {
     setIsDataLoading(true);
@@ -314,13 +313,13 @@ function MasterAdmin() {
       .then((r) => r.json())
       .then((d) => { if (d.success) setOrdersList(d.orders || []); })
       .finally(() => setIsDataLoading(false));
-  }, [currentUser.email]);
+  }, [authHeaders]);
 
   const fetchWorkers = useCallback(() => {
     fetch(`${API_BASE}/api/admin/workers`, { headers: authHeaders })
       .then((r) => r.json())
       .then((d) => { if (d.success) setWorkersList(d.workers || []); });
-  }, [currentUser.email]);
+  }, [authHeaders]);
 
   const fetchCurrentAffairsAdmin = useCallback(() => {
     setIsDataLoading(true);
@@ -329,7 +328,7 @@ function MasterAdmin() {
       .then((d) => { if (Array.isArray(d)) setCaList(d); })
       .catch(() => {})
       .finally(() => setIsDataLoading(false));
-  }, [currentUser.email]);
+  }, [authHeaders]);
 
   const fetchSlides = useCallback(() => {
     setIsDataLoading(true);
@@ -346,7 +345,7 @@ function MasterAdmin() {
       })
       .catch(() => {})
       .finally(() => setIsDataLoading(false));
-  }, [currentUser.email]);
+  }, [authHeaders]);
 
   const fetchPointsReport = useCallback(() => {
     setIsReportLoading(true);
@@ -371,17 +370,17 @@ function MasterAdmin() {
         setReportsList([]);
       })
       .finally(() => setIsReportLoading(false));
-  }, [reportType, reportFromDate, reportToDate, currentUser.email]);
+  }, [reportType, reportFromDate, reportToDate, authHeaders]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
 
     if (activeTab === 'dashboard') {
-      setIsDataLoading(true);
-      fetchOrders();
-      fetchSubscribers();
-      fetchUsers();
-      setIsDataLoading(false);
+      setTimeout(() => {
+        fetchOrders();
+        fetchSubscribers();
+        fetchUsers();
+      }, 0);
 
       if (quizzesList.length === 0) {
         fetch(`${API_BASE}/api/quiz/questions`)
@@ -390,20 +389,22 @@ function MasterAdmin() {
       }
     }
 
-    if (activeTab === 'subscribers') fetchSubscribers();
+    if (activeTab === 'subscribers') setTimeout(fetchSubscribers, 0);
     if (activeTab === 'orders' || activeTab === 'refund_management') {
-      fetchOrders();
-      fetchUsers();
-      fetchSubscribers();
+      setTimeout(() => {
+        fetchOrders();
+        fetchUsers();
+        fetchSubscribers();
+      }, 0);
     }
-    if (activeTab === 'users') fetchUsers();
-    if (activeTab === 'control') fetchWorkers();
-    if (activeTab === 'current-affairs') fetchCurrentAffairsAdmin();
-    if (activeTab === 'reports') fetchPointsReport();
-    if (activeTab === 'slider') fetchSlides();
+    if (activeTab === 'users') setTimeout(fetchUsers, 0);
+    if (activeTab === 'control') setTimeout(fetchWorkers, 0);
+    if (activeTab === 'current-affairs') setTimeout(fetchCurrentAffairsAdmin, 0);
+    if (activeTab === 'reports') setTimeout(fetchPointsReport, 0);
+    if (activeTab === 'slider') setTimeout(fetchSlides, 0);
 
     if (activeTab === 'questions' && quizzesList.length === 0) {
-      setIsDataLoading(true);
+      setTimeout(() => setIsDataLoading(true), 0);
       fetch(`${API_BASE}/api/quiz/questions`)
         .then((r) => r.json())
         .then((d) => { if (d.success) setQuizzesList(d.questions || []); })
@@ -411,7 +412,7 @@ function MasterAdmin() {
     }
 
     if (activeTab === 'freetest' && freeTestsList.length === 0) {
-      setIsDataLoading(true);
+      setTimeout(() => setIsDataLoading(true), 0);
       fetch(`${API_BASE}/api/admin/all-tests`, { headers: authHeaders })
         .then((r) => r.json())
         .then((d) => { if (d.success) setFreeTestsList(d.tests || []); })
@@ -419,13 +420,13 @@ function MasterAdmin() {
     }
 
     if (activeTab === 'materials' && livePdfs.length === 0) {
-      setIsDataLoading(true);
+      setTimeout(() => setIsDataLoading(true), 0);
       fetch(`${API_BASE}/api/admin/all-pdfs`, { headers: authHeaders })
         .then((r) => r.json())
         .then((d) => { if (d.success) setLivePdfs(d.pdfs || []); })
         .finally(() => setIsDataLoading(false));
     }
-  }, [activeTab, isLoggedIn, currentUser.email, fetchOrders, fetchSubscribers, fetchUsers, fetchWorkers, fetchCurrentAffairsAdmin, fetchPointsReport, fetchSlides]);
+  }, [activeTab, isLoggedIn, currentUser.email, authHeaders, quizzesList.length, freeTestsList.length, livePdfs.length, fetchOrders, fetchSubscribers, fetchUsers, fetchWorkers, fetchCurrentAffairsAdmin, fetchPointsReport, fetchSlides]);
 
   const handleSaveCurrentAffairs = async (e) => {
     e.preventDefault();
@@ -709,7 +710,6 @@ function MasterAdmin() {
       return showNotification('பெயர் மற்றும் Password கட்டாயம்!', 'warning');
     }
     
-    // Auto-generate Login User ID based on Name
     const autoUserId = newWorkerData.name.toLowerCase().trim().replace(/\s+/g, '_') + '_worker';
     const autoEmail = `${autoUserId}@vaagai.com`;
 
@@ -863,7 +863,7 @@ function MasterAdmin() {
       type: 'quiz',
       id: editingQuestionId,
       subject: 'TNPSC',
-      topic: questionFormData.subCategory, // Mapping subCategory as Topic for compatibility
+      topic: questionFormData.subCategory,
       category: questionFormData.category,
       subCategory: questionFormData.subCategory,
       questionSet: 'Topic Test',
@@ -933,10 +933,9 @@ function MasterAdmin() {
     }
   };
 
-  // 🆕 Test Modal Open / Reset 2-Step
   const handleOpenAddTest = () => {
     setEditingTestId(null);
-    setTestModalStep(1); // Set to Step 1
+    setTestModalStep(1);
     setTestFormData({
       examType: 'Online Test',
       title: '',
@@ -955,10 +954,9 @@ function MasterAdmin() {
     setShowTestModal(true);
   };
 
-  // 🆕 Test Modal Edit / Reset 2-Step
   const handleOpenEditTest = (t) => {
     setEditingTestId(t.id || t._id);
-    setTestModalStep(1); // Set to Step 1
+    setTestModalStep(1);
     const selTopics = Array.isArray(t.selectedTopics) && t.selectedTopics.length > 0 ? t.selectedTopics : [t.topic || 'இலக்கணம் (Grammar)'];
     
     const defaultCounts = {};
@@ -1179,7 +1177,6 @@ function MasterAdmin() {
     setCaFormData((prev) => ({ ...prev, [field]: val }));
   };
 
-  // Notification Save / Edit / Delete Handlers (with Start & End Date/Time)
   const handleSaveNotificationItem = (e) => {
     e.preventDefault();
     if (!notifFormData.title.trim()) return showNotification('Title is required!', 'warning');
@@ -1509,7 +1506,6 @@ function MasterAdmin() {
         </header>
 
         <main className="content-area">
-          {/* Dashboard Tab */}
           {activeTab === 'dashboard' && (
             <div>
               <div className="page-header-row">
@@ -1595,7 +1591,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 🔔 1. EXAM NOTIFICATIONS TAB */}
           {activeTab === 'notif_exam' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1707,7 +1702,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 📚 2. STUDY MATERIAL & NOTES TAB */}
           {activeTab === 'notif_study' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1818,7 +1812,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 📢 3. MASTER ALERT TAB */}
           {activeTab === 'notif_master' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1901,7 +1894,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 💳 All Orders Tab */}
           {isMasterAdmin && activeTab === 'orders' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -1987,7 +1979,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 🔄 REFUND MANAGEMENT PAGE */}
           {isMasterAdmin && activeTab === 'refund_management' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
@@ -2136,7 +2127,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 👥 Users Tab */}
           {isMasterAdmin && activeTab === 'users' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2219,7 +2209,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 📂 Manage Submenu Tab (Updated Category & Sub-Category) */}
           {activeTab.startsWith('manage_') && (
             <div>
               {activeTab === 'manage_qset' ? (
@@ -2408,7 +2397,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 🖼️ Home Slider Tab */}
           {isTabAllowed('slider') && activeTab === 'slider' && (
             <div>
               <div className="page-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2471,7 +2459,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 📰 Current Affairs Tab */}
           {isTabAllowed('current-affairs') && activeTab === 'current-affairs' && (
             <div>
               <div className="page-header-row">
@@ -2547,7 +2534,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* 📊 Reports Tab */}
           {activeTab === 'reports' && (
             <div>
               <div className="page-header-row">
@@ -2638,12 +2624,10 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* Access Control Tab */}
           {activeTab === 'control' && (
             <div>
               <div className="page-header-row"><h2 className="page-title">⚙️ Worker Access Control</h2></div>
               
-              {/* Button to Toggle Create Work User Form */}
               <div style={{ marginBottom: '20px' }}>
                 <button
                   type="button"
@@ -2861,7 +2845,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* Question Bank Tab */}
           {isTabAllowed('questions') && activeTab === 'questions' && (
             <div>
               <div className="page-header-row">
@@ -2931,7 +2914,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* Pdf Bank Tab */}
           {isTabAllowed('materials') && activeTab === 'materials' && (
             <div>
               <div className="page-header-row">
@@ -2969,7 +2951,6 @@ function MasterAdmin() {
             </div>
           )}
 
-          {/* Online Test Tab */}
           {isTabAllowed('freetest') && activeTab === 'freetest' && (
             <div>
               <div className="page-header-row">
@@ -3039,7 +3020,6 @@ function MasterAdmin() {
         <footer className="footer-copyright">Vaagai Tuition © 2026. All rights reserved.</footer>
       </div>
 
-      {/* 🔔 Notification Add / Edit Modal (With Start & End Date/Time) */}
       {showNotifModal && (
         <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div className="modal-content" style={{ width: '650px', maxWidth: '95vw', background: '#fff', padding: '28px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
@@ -3143,7 +3123,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* 🖼️ Manage Home Slider Modal */}
       {showSlideModal && (
         <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div className="modal-content" style={{ width: '920px', maxWidth: '95vw', maxHeight: '95vh', overflowY: 'auto', background: '#fff', padding: '28px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
@@ -3335,7 +3314,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* 📰 Current Affairs Modal */}
       {showCaModal && (
         <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div className="modal-content" style={{ width: '850px', maxWidth: '95vw', maxHeight: '95vh', overflowY: 'auto', background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
@@ -3481,7 +3459,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* Viewing Modals */}
       {viewingCa && (
         <div className="modal-overlay" onClick={() => setViewingCa(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
@@ -3496,7 +3473,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* Universal View Item (Updated for QSET View Modal) */}
       {viewingItem && (
         <div className="modal-overlay" onClick={() => setViewingItem(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -3541,7 +3517,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* Question Modal (Upgraded with Main & Sub Category Selection) */}
       {showQuestionModal && (
         <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div className="modal-content" style={{ width: '900px', maxWidth: '95vw', maxHeight: '95vh', overflowY: 'auto', background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
@@ -3661,7 +3636,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* User Modal */}
       {showUserModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -3688,7 +3662,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* PDF Bank Modal */}
       {showPdfModal && (
         <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div className="modal-content" style={{ width: '900px', maxWidth: '95vw', maxHeight: '95vh', overflowY: 'auto', background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
@@ -3830,12 +3803,10 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* 📝 Online Test Modal - 2 Steps Structure */}
       {showTestModal && (
         <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div className="modal-content" style={{ width: '850px', maxWidth: '95vw', maxHeight: '95vh', overflowY: 'auto', background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
             
-            {/* Modal Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
               <h2 style={{ color: '#0f766e', margin: 0 }}>
                 {editingTestId ? '✏️ Edit Online Test' : '➕ Add Online Test'} <span style={{fontSize: '14px', color: '#64748b', fontWeight: 'normal'}}>(Step {testModalStep} of 2)</span>
@@ -3868,8 +3839,6 @@ function MasterAdmin() {
             </div>
 
             <form onSubmit={handleSaveTest}>
-
-              {/* =========== STEP 1: Basic Info & Schedule =========== */}
               {testModalStep === 1 && (
                 <div className="step-1-container fade-in-animation">
                   <div style={{ marginBottom: '18px' }}>
@@ -4030,7 +3999,6 @@ function MasterAdmin() {
                 </div>
               )}
 
-              {/* =========== STEP 2: Categories / Topics Selection =========== */}
               {testModalStep === 2 && (
                 <div className="step-2-container fade-in-animation">
                   <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #e2e8f0' }}>
@@ -4038,7 +4006,6 @@ function MasterAdmin() {
                       Select Categories / Topics for Test Questions:
                     </label>
                     
-                    {/* Nested Sub-Topics Selection Layout */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
                       {Object.keys(availableTestTopics).map((mainTopic) => (
                         <div key={mainTopic} style={{ background: '#fff', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
@@ -4057,7 +4024,7 @@ function MasterAdmin() {
                                     
                                     const updatedCounts = { ...testFormData.topicQuestionCounts };
                                     if (!current.includes(subTopic)) {
-                                      updatedCounts[subTopic] = 10; // Default questions count for new topic
+                                      updatedCounts[subTopic] = 10;
                                     } else {
                                       delete updatedCounts[subTopic];
                                     }
@@ -4133,7 +4100,6 @@ function MasterAdmin() {
         </div>
       )}
 
-      {/* Preview Modal */}
       {previewTest && (
         <div className="modal-overlay" onClick={() => setPreviewTest(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}>
