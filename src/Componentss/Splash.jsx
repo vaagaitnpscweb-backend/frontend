@@ -9,7 +9,7 @@ function Splash({ children }) {
     // 2 வினாடிகள் (2000ms) கழித்து ஸ்பிளாஷ் ஸ்கிரீன் மறையும்
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
