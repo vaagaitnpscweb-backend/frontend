@@ -1,5 +1,4 @@
-import  { useState, useEffect } from 'react';
-
+import { useState, useEffect } from 'react';
 
 const API_BASE = 'https://vaagai-tuition-backend.onrender.com';
 
@@ -28,8 +27,50 @@ function Twelfth() {
       });
   }, []);
 
-  const handleOpenPdf = (driveUrl) => {
+  const handleOpenPdf = async (pdf) => {
+    const driveUrl = pdf.questionPdfLink;
     if (!driveUrl) return alert("PDF Link not available!");
+
+    // 1. இலவச PDF அல்லது அட்மின் இலவசம் எனில் நேரடியாகத் திறக்கலாம்
+    if (pdf.isFree) {
+      openDrivePreview(driveUrl);
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.email) {
+      alert("தயவுசெய்து முதலில் Login செய்யவும்!");
+      return;
+    }
+
+    try {
+      // 2. சப்ஸ்கிரிப்ஷன் வைத்துள்ளாரா அல்லது ஏற்கனவே பணம் செலுத்தியுள்ளாரா என சரிபார்க்கவும்
+      const res = await fetch(`${API_BASE}/api/user/check-access?email=${user.email}&pdfId=${pdf.id || pdf._id}`);
+      const data = await res.json();
+
+      if (data.success && data.hasAccess) {
+        // 🟢 சப்ஸ்கிரிப்ஷன் அல்லது பேமெண்ட் செய்துள்ளார் -> டவுன்லோட் அனுமதிக்கப்படும்
+        openDrivePreview(driveUrl);
+      } else {
+        // 🔴 கட்டணம் செலுத்த வேண்டும்
+        const confirmBuy = window.confirm(`இந்த PDF-ன் விலை ₹${pdf.price || 5}. வாகை பிரீமியம் திட்டம் அல்லது தனிப்பட்ட கட்டணம் செலுத்திப் பெற விரும்புகிறீர்களா?`);
+        if (confirmBuy) {
+          // இங்கே பிரீமியம் பக்கத்திற்குத் திருப்பலாம் அல்லது பேமெண்ட் கேட்வேயைத் திறக்கலாம்
+          window.location.href = '/premium';
+        }
+      }
+    } catch (err) {
+      console.error("Access check error:", err);
+      alert("செலக்ஷன் சரிபார்ப்பில் பிழை ஏற்பட்டது.");
+    }
+  };
+
+  const handleOpenAnsKey = (ansUrl) => {
+    if (!ansUrl) return alert("Answer Key Link not available!");
+    openDrivePreview(ansUrl);
+  };
+
+  const openDrivePreview = (driveUrl) => {
     let finalUrl = driveUrl.trim();
     if (finalUrl.includes('drive.google.com')) {
       const match = finalUrl.match(/\/d\/(.+?)\/(view|preview)?/) || finalUrl.match(/id=(.+?)(&|$)/);
@@ -50,7 +91,7 @@ function Twelfth() {
   return (
     <div className="materials-container" style={{ padding: '30px', maxWidth: '1100px', margin: '0 auto' }}>
       <h1 style={{ color: '#0f766e', marginBottom: '8px' }}>📚 12th Standard (+2) Question Papers</h1>
-      <p style={{ color: '#64748b', marginBottom: '25px' }}>Free and Paid model question papers for 12th standard students.</p>
+      <p style={{ color: '#64748b', marginBottom: '25px' }}>Free and Paid model question papers for 12th standard students. (சப்ஸ்கிரிப்ஷன் வைத்துள்ள மாணவர்களுக்கு அனைத்து PDF-களும் முற்றிலும் இலவசம்!)</p>
 
       {pdfs.length === 0 ? (
         <p style={{ textAlign: 'center', color: '#94a3b8', padding: '40px', background: '#fff', borderRadius: '8px', border: '1px solid #cbd5e1' }}>No 12th materials uploaded yet. Check back soon!</p>
@@ -62,7 +103,7 @@ function Twelfth() {
                 <th style={{ padding: '12px 16px', width: '60px' }}>S.No</th>
                 <th style={{ padding: '12px 16px' }}>Question Name / Title</th>
                 <th style={{ padding: '12px 16px', width: '130px' }}>Type / Price</th>
-                <th style={{ padding: '12px 16px', textAlign: 'center', width: '150px' }}>Download</th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', width: '200px' }}>Download / View</th>
               </tr>
             </thead>
             <tbody>
@@ -86,12 +127,22 @@ function Twelfth() {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                      <button 
-                        onClick={() => handleOpenPdf(p.questionPdfLink)} 
-                        style={{ padding: '6px 14px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}
-                      >
-                        📄 View PDF
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button 
+                          onClick={() => handleOpenPdf(p)} 
+                          style={{ padding: '6px 12px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}
+                        >
+                          📄 Qn PDF
+                        </button>
+                        {p.answerPdfLink && (
+                          <button 
+                            onClick={() => handleOpenAnsKey(p.answerPdfLink)} 
+                            style={{ padding: '6px 12px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}
+                          >
+                            🔑 Ans PDF
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
