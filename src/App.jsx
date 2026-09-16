@@ -9,7 +9,7 @@ import Home from './Pages/Home.jsx';
 
 // இம்போர்ட் பாத்:
 import CurrentAffairs from './Componentss/CurrentAffairs.jsx';
-import MockTest from './Componentss/Mocktest.jsx';
+import MockTest from './Componentss/MockTest.jsx';
 import PremiumPacks from './Componentss/PremiumPacks.jsx'; 
 import Rrb from './Componentss/RrbQuiz.jsx';
 import Tnpsc from './Componentss/TnpscQuiz.jsx'; 
