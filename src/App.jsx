@@ -9,7 +9,7 @@ import Home from './Pages/Home.jsx';
 
 // இம்போர்ட் பாத்:
 import CurrentAffairs from './Componentss/CurrentAffairs.jsx';
-import FreeQuiz from './Componentss/FreeQuiz.jsx';
+import MockTest from './Componentss/Mocktest.jsx';
 import PremiumPacks from './Componentss/PremiumPacks.jsx'; 
 import Rrb from './Componentss/RrbQuiz.jsx';
 import Tnpsc from './Componentss/TnpscQuiz.jsx'; 
@@ -21,6 +21,7 @@ import Footer from './Componentss/Footer.jsx';
 import LegalPage from './Componentss/LegalPage.jsx';
 import Tenth from './Componentss/Tenth.jsx';
 import Twelfth from './Componentss/Twelfth.jsx';
+import SearchPdfs from './Componentss/SearchPdf.jsx';
 
 // 👑 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள்
 import AdminLogin from './AdminPages/AdminLogin.jsx';
@@ -73,29 +74,33 @@ function AppContent({ user, setUser, showLogin, setShowLogin }) {
         />
       )}
 
-      {/* ரௌட்ஸ் */}
-      <Routes>
-        {/* 🟢 சாதாரண மாணவர்கள் அணுகக்கூடிய பக்கங்கள் */}
-        <Route path="/" element={<Home />} />
-        <Route path="/current-affairs" element={<CurrentAffairs />} />
-        <Route path="/free-quiz" element={<FreeQuiz />} />
-        <Route path="/premium" element={<PremiumPacks />} />
-        <Route path="/rrb" element={<Rrb />} />
-        <Route path="/tnpsc" element={<Tnpsc />} />
-        <Route path="/si" element={<Si />} />
-        <Route path="/pc" element={<Pc />} />
-        <Route path="/purchases" element={<MyPurchases />} />
-        <Route path="/legalpage" element={<LegalPage />} />
-        <Route path="/tenth" element={<Tenth />} />
-        <Route path="/twelfth" element={<Twelfth />} />
+      {/* 🚀 முக்கிய மாற்றம்: மாணவர் பக்கங்களுக்கு மட்டும் நெவ்பார் பின்னால் கன்டென்ட் மறையாமல் இருக்க paddingTop கொடுக்கப்பட்டுள்ளது */}
+      <div style={{ paddingTop: hideNavbarAndFooter ? '0px' : '135px' }}>
+        {/* ரௌட்ஸ் */}
+        <Routes>
+          {/* 🟢 சாதாரண மாணவர்கள் அணுகக்கூடிய பக்கங்கள் */}
+          <Route path="/" element={<Home />} />
+          <Route path="/current-affairs" element={<CurrentAffairs />} />
+          <Route path="/mocktest" element={<MockTest />} />
+          <Route path="/premium" element={<PremiumPacks />} />
+          <Route path="/rrb" element={<Rrb />} />
+          <Route path="/tnpsc" element={<Tnpsc />} />
+          <Route path="/si" element={<Si />} />
+          <Route path="/pc" element={<Pc />} />
+          <Route path="/purchases" element={<MyPurchases />} />
+          <Route path="/legalpage" element={<LegalPage />} />
+          <Route path="/tenth" element={<Tenth />} />
+          <Route path="/twelfth" element={<Twelfth />} />
+          <Route path="/search-pdfs" element={<SearchPdfs />} />
 
-        {/* 🔐 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள் */}
-        <Route path='/adminlogin' element={<AdminLogin />} />
-        <Route path='/masteradmin' element={<MasterAdmin />} />
-        
-        {/* தவறான URL அடித்தால் ஹோம் பக்கத்திற்குத் திருப்ப */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* 🔐 அட்மின் மற்றும் சூப்பர் அட்மின் பக்கங்கள் */}
+          <Route path='/adminlogin' element={<AdminLogin />} />
+          <Route path='/masteradmin' element={<MasterAdmin />} />
+          
+          {/* தவறான URL அடித்தால் ஹோம் பக்கத்திற்குத் திருப்ப */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
       
       {/* Footer - அட்மின் பக்கங்களில் மறைக்கப்படும் */}
       {!hideNavbarAndFooter && <Footer />}
