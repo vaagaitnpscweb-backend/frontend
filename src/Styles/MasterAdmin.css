@@ -151,7 +151,7 @@ html, body {
   text-align: left;
   width: 100%;
   transition: var(--transition);
-  min-height: 40px; /* Touch friendly on mobile */
+  min-height: 40px;
 }
 
 .nav-item:hover {
@@ -430,7 +430,7 @@ html, body {
   border-spacing: 0;
   font-size: 12px;
   text-align: left;
-  white-space: nowrap; /* Prevents awkward wrapping on desktop, scrolls nicely on mobile */
+  white-space: nowrap;
 }
 
 .custom-table th {
@@ -724,7 +724,6 @@ html, body {
   .stats-grid, .pricing-plans-container { grid-template-columns: 1fr; }
   .grid-2-col { grid-template-columns: 1fr; }
   
-  /* Mobile table adjustments for effortless horizontal scrolling */
   .table-responsive {
     border: 1px solid var(--border-color);
   }
